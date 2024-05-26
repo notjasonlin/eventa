@@ -6,7 +6,7 @@ const UserPage = () => {
 
   return (
     <View>
-      <Text>User Page - {id}</Text>
+      <Text>Profile - {id}</Text>
     </View>
   );
 };

@@ -9,6 +9,7 @@ const RootLayout = () => {
           headerShown: false,
         }}
       />
+      {/* <Stack.Screen name="(tabs)/(messages)"/> */}
     </Stack>
   );
 };

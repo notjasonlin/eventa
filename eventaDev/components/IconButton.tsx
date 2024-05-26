@@ -1,4 +1,6 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { AntDesign } from '@expo/vector-icons';
+
 
 interface IconButtonProps {
     children?: React.ReactNode;
@@ -8,11 +10,12 @@ interface IconButtonProps {
 
 const IconButton = ({ children, onPress }: IconButtonProps) => {
     return (
-        <Pressable onPress={onPress} style={styles.container}>
-            <Text>
+        <TouchableOpacity onPress={onPress} style={styles.container}>
+            {/* <Text>
                 {children}
-            </Text>
-        </Pressable>
+            </Text> */}
+            <AntDesign name="mail" size={24} color="black" />
+        </TouchableOpacity>
     );
 }
 

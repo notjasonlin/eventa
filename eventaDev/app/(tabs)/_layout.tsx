@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import NavButton from "../../components/NavButton";
 
 const TabsLayout = () => {
   return (
@@ -7,6 +8,7 @@ const TabsLayout = () => {
         name="index"
         options={{
           title: "Home",
+          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>)
         }}
       />
       <Tabs.Screen
@@ -14,6 +16,7 @@ const TabsLayout = () => {
         options={{
           headerTitle: "User Page",
           title: "User",
+          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>)
         }}
       />
       <Tabs.Screen
@@ -21,6 +24,7 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Vendor", // Change into vendor name in the future
           title: "Vendor",
+          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>)
         }}
       />
       <Tabs.Screen
@@ -28,6 +32,7 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Smart Budget",
           title: "Budget",
+          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>)
         }}
       />
       <Tabs.Screen
@@ -35,6 +40,7 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Checklist",
           title: "Checklist",
+          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>)
         }}
       />
     </Tabs>

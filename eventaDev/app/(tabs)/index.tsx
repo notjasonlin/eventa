@@ -1,8 +1,10 @@
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
 
-const HomePage = () => {
+const StartPage = () => {
   return (
+
+
     <View>
       <Text>Home Page</Text>
       <Link href="/users/1">Go to user 1</Link>
@@ -13,4 +15,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default StartPage;

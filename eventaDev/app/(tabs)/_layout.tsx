@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import NavButton from "../../components/NavButton";
+import NavButton from "../../components/Buttons/NavButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Octicons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';

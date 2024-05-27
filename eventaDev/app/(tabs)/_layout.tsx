@@ -27,9 +27,9 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="vendors/[vendorid]"
+        name="vendors/fetchVendor"
         options={{
-          headerTitle: "Vendor", // Change into vendor name in the future
+          headerTitle: "Vendor Marketplace", // Change into vendor name in the future
           title: "Vendor",
           headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
           tabBarIcon: () => <Ionicons name="storefront-outline" size={24} color="black" />

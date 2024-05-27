@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 //component
-import VendorCard from "./vendorCard";
+import VendorCard from "../../../components/vendorCard";
 
 const FetchVendor = () => {
   const [fetchError, setFetchError] = useState(null);

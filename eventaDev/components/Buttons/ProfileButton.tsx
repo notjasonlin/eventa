@@ -1,30 +1,30 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import { AntDesign } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import React from "react";
 
 
-interface IconButtonProps {
+interface ProfileButtonProps {
     children?: React.ReactNode;
     location?: string;
     onPress?: () => void;
 }
 
-const IconButton = ({ children, onPress }: IconButtonProps) => {
+const ProfileButton = ({ children, onPress }: ProfileButtonProps) => {
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             {/* <Text>
                 {children}
             </Text> */}
-            <AntDesign name="mail" size={24} color="black" />
+            <Feather name="user" size={23} color="black" />
         </TouchableOpacity>
     );
 }
 
-export default IconButton;
+export default ProfileButton;
 
 const styles = StyleSheet.create({
     container: {
         // flex: 1,
-        marginHorizontal: 20,
+        marginHorizontal: 5,
     }
 })

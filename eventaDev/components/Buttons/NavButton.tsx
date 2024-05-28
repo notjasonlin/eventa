@@ -1,21 +1,29 @@
-import IconButton from "./IconButton";
+import { View } from "react-native";
 import { useRouter } from "expo-router";
+import MessageButton from "./MessageButton";
+import ProfileButton from "./ProfileButton";
 
 interface NavButtonProps {
-    children?: React.ReactNode;
-    destination: string;
+    messageDestination: string;
+    profileDestination: string;
 }
 
-const NavButton = ({ children, destination }: NavButtonProps) => {
+const NavButton = ({ messageDestination, profileDestination }: NavButtonProps) => {
     const router = useRouter();
     
-    const navHandler = () => {
-        router.push(destination);
-        // console.log("Pressed!");
+    const messageNavHandler = () => {
+        router.push(messageDestination);
+    }
+
+    const profileNavHandler = () => {
+        router.push(profileDestination);
     }
     
     return (
-         <IconButton onPress={navHandler}>{children}</IconButton>
+        <View style={{ flexDirection: 'row' }}>
+            <MessageButton onPress={messageNavHandler}>Messages</MessageButton>
+            <ProfileButton onPress={profileNavHandler}>Profile</ProfileButton>
+        </View>
     );
 }
 

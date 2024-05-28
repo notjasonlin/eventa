@@ -3,9 +3,6 @@ import NavButton from "../../components/Buttons/NavButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Octicons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
-import React from "react";
-
 
 const TabsLayout = () => {
   return (
@@ -14,7 +11,12 @@ const TabsLayout = () => {
         name="index"
         options={{
           title: "Home",
-          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
+          headerRight: () => (
+            <NavButton 
+              messageDestination="(messages)/1" 
+              profileDestination="(profile)/Account"
+            />
+          ),
           tabBarIcon: () => <AntDesign name="home" size={23} color="black" />
         }}
       />
@@ -23,17 +25,27 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Checklist",
           title: "Checklist",
-          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
+          headerRight: () => (
+            <NavButton 
+              messageDestination="(messages)/1" 
+              profileDestination="(profile)/Account"
+            />
+          ),
           tabBarIcon: () => <Octicons name="checklist" size={20} color="black" />
         }}
       />
       <Tabs.Screen
-        name="vendors/fetchVendor"
+        name="event/[eventid]"
         options={{
-          headerTitle: "Vendor Marketplace", // Change into vendor name in the future
-          title: "Vendor",
-          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
-          tabBarIcon: () => <Ionicons name="storefront-outline" size={24} color="black" />
+          headerTitle: "Event Page",
+          title: "Events",
+          headerRight: () => (
+            <NavButton 
+              messageDestination="(messages)/1" 
+              profileDestination="(profile)/Account"
+            />
+          ),
+          tabBarIcon: () => <Octicons name="diff-added" size={24} color="black" />
         }}
       />
       <Tabs.Screen
@@ -41,17 +53,27 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Smart Budget",
           title: "Budget",
-          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
+          headerRight: () => (
+            <NavButton 
+              messageDestination="(messages)/1" 
+              profileDestination="(profile)/Account"
+            />
+          ),
           tabBarIcon: () => <Ionicons name="calculator-outline" size={24} color="black" />
         }}
       />
       <Tabs.Screen
-        name="users/Account"
+        name="vendors/fetchVendor"
         options={{
-          headerTitle: "User Page",
-          title: "Profile",
-          headerRight: () => (<NavButton destination="(messages)/1">Messages</NavButton>),
-          tabBarIcon: () => <Feather name="user" size={24} color="black" />
+          headerTitle: "Vendor Marketplace", // Change into vendor name in the future
+          title: "Vendor",
+          headerRight: () => (
+            <NavButton 
+              messageDestination="(messages)/1" 
+              profileDestination="(profile)/Account"
+            />
+          ),
+          tabBarIcon: () => <Ionicons name="storefront-outline" size={24} color="black" />
         }}
       />
     </Tabs>

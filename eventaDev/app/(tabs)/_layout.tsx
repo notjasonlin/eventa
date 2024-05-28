@@ -46,7 +46,7 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="users/[id]"
+        name="users/Account"
         options={{
           headerTitle: "User Page",
           title: "Profile",

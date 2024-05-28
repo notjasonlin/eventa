@@ -6,7 +6,7 @@ const UserPage = () => {
 
   return (
     <View>
-      <Text>Checklist - {budgetid}</Text>
+      <Text>Budget - {budgetid}</Text>
     </View>
   );
 };

@@ -1,6 +1,7 @@
-import { View } from "react-native";
-import { useRouter } from "expo-router";
-import IconButton from "./IconButton";
+import React from 'react';
+import { View } from 'react-native';
+import { useRouter } from 'expo-router';
+import IconButton from './IconButton';
 
 interface NavButtonProps {
     destination: string;
@@ -16,7 +17,7 @@ const NavButton = ({ destination, icon }: NavButtonProps) => {
     
     return (
         <View style={{ flexDirection: 'row' }}>
-            <IconButton onPress={navHandler} icon={icon}>Messages</IconButton>
+            <IconButton onPress={navHandler} icon={icon} />
         </View>
     );
 }

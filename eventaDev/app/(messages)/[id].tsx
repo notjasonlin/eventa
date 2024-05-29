@@ -1,11 +1,8 @@
-import { View, Text } from "react-native";
+import React from 'react';
+import EventForm from '../../components/eventForm'; // Adjust the path as needed
 
-const MessagesPage = () => {
-    return (
-        <View>
-            <Text>Messages!</Text>
-        </View>
-    );
-} 
+const AddEvent: React.FC = () => {
+  return <EventForm />;
+};
 
-export default MessagesPage;
+export default AddEvent;

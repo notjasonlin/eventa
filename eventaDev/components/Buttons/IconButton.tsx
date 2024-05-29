@@ -20,6 +20,6 @@ export default IconButton;
 const styles = StyleSheet.create({
     container: {
         // flex: 1,
-        marginHorizontal: 20,
+        marginHorizontal: 10,
     }
 })

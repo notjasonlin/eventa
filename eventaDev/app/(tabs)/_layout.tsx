@@ -25,9 +25,6 @@ const TabsLayout = () => {
               />
             </View>
           ),
-          // headerLeft: () => (
-
-          // ),
           tabBarIcon: () => <AntDesign name="home" size={23} color="black" />
         }}
       />
@@ -36,12 +33,18 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Checklist",
           title: "Checklist",
-          // headerRight: () => (
-          //   <NavButton
-          //     messageDestination="(messages)/1"
-          //     profileDestination="(profile)/Account"
-          //   />
-          // ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", marginLeft: 10 }}>
+              <NavButton
+                destination="(messages)/1"
+                icon={<AntDesign name="mail" size={24} color="black" />}
+              />
+              <NavButton
+                destination="(profile)/Account"
+                icon={<Feather name="user" size={23} color="black" />}
+              />
+            </View>
+          ),
           tabBarIcon: () => <Octicons name="checklist" size={20} color="black" />
         }}
       />
@@ -50,12 +53,18 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Event Page",
           title: "Events",
-          // headerRight: () => (
-          //   <NavButton
-          //     messageDestination="(messages)/1"
-          //     profileDestination="(profile)/Account"
-          //   />
-          // ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", marginLeft: 10 }}>
+              <NavButton
+                destination="(messages)/1"
+                icon={<AntDesign name="mail" size={24} color="black" />}
+              />
+              <NavButton
+                destination="(profile)/Account"
+                icon={<Feather name="user" size={23} color="black" />}
+              />
+            </View>
+          ),
           tabBarIcon: () => <Octicons name="diff-added" size={24} color="black" />
         }}
       />
@@ -64,12 +73,18 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Smart Budget",
           title: "Budget",
-          // headerRight: () => (
-          //   <NavButton
-          //     messageDestination="(messages)/1"
-          //     profileDestination="(profile)/Account"
-          //   />
-          // ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", marginLeft: 10 }}>
+              <NavButton
+                destination="(messages)/1"
+                icon={<AntDesign name="mail" size={24} color="black" />}
+              />
+              <NavButton
+                destination="(profile)/Account"
+                icon={<Feather name="user" size={23} color="black" />}
+              />
+            </View>
+          ),
           tabBarIcon: () => <Ionicons name="calculator-outline" size={24} color="black" />
         }}
       />
@@ -78,12 +93,18 @@ const TabsLayout = () => {
         options={{
           headerTitle: "Vendor Marketplace", // Change into vendor name in the future
           title: "Vendor",
-          // headerRight: () => (
-          //   <NavButton
-          //     messageDestination="(messages)/1"
-          //     profileDestination="(profile)/Account"
-          //   />
-          // ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", marginLeft: 10 }}>
+              <NavButton
+                destination="(messages)/1"
+                icon={<AntDesign name="mail" size={24} color="black" />}
+              />
+              <NavButton
+                destination="(profile)/Account"
+                icon={<Feather name="user" size={23} color="black" />}
+              />
+            </View>
+          ),
           tabBarIcon: () => <Ionicons name="storefront-outline" size={24} color="black" />
         }}
       />

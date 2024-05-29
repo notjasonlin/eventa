@@ -1,37 +1,29 @@
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
-import { supabase } from "../../lib/supabase";
-import { useState, useEffect } from "react";
+import StyleButton from "../../components/Buttons/StyleButton";
+import * as ImagePicker from 'expo-image-picker';
+import { grabEmail } from "../../functions/grabEmail";
 
-export const FetchEmail = () => {
-  const [fetchError, setFetchError] = useState<boolean | null>(null);
-  const [email, setEmail] = useState("");
+export const HomePage = () => {
+  let email = grabEmail();
 
-  useEffect(() => {
-    console.log("Entered");
-    const Fetch = async () => {
-      const { data: email, error } = await supabase.from("profile").select("email");
+  const getImageHandler = async () => {
+    let res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
 
-      if (error) {
-        setFetchError(true);
-        console.log("Error fetching email");
-      } else {
-        if (email && email.length > 0) {
-          setEmail(email[0].email);
-        }
-        setFetchError(false);
-        console.log("Email fetched successfully");
-      }
-      console.log(email);
-    };
+    console.log(res);
+  }
 
-    Fetch();
-  }, []);
 
   return (
     <View>
       <Text>Home Page</Text>
-      {fetchError === false && <Text>{email}</Text>}
+      <Text>{email}</Text>
+      <StyleButton onPress={getImageHandler}>Add image!</StyleButton>
       <Link href="/users/1">Go to user 1</Link>
       <Link href="/users/2">Go to user 2</Link>
       <Link href="/vendors/fetchVendor">Go to Marketplace</Link>
@@ -40,4 +32,4 @@ export const FetchEmail = () => {
   );
 }
 
-export default FetchEmail;
+export default HomePage;

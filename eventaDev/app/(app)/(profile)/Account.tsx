@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { StyleSheet, View, Alert } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../../lib/supabase'
+import { useAuth } from '../../../context/auth'
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
+  const { signOut } = useAuth();
 
   useEffect(() => {
     if (session) getProfile()
@@ -86,7 +88,7 @@ export default function Account({ session }: { session: Session }) {
       </View> */}
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button title="Sign Out" onPress={() => signOut()} />
       </View>
     </View>
   )

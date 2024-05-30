@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { v4 as uuidv4 } from 'uuid';
-import { ImagePickerResult } from 'expo-image-picker';
+import uuid from 'react-native-uuid'; 
 import * as FileSystem from 'expo-file-system';
-
-
-type Profile = {
-    id: string;
-};
+import { Buffer } from 'buffer';
+import * as mime from 'react-native-mime-types';
+import { Alert } from 'react-native';
 
 export const uploadOnePhoto = async (uri: string) => {
-
-    let userId = await FetchProfile();
     try {
+        let userId = await FetchProfile();
         let file = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
 
         // Buffer.from used as a binary buffer
-        // let { data, error } = await supabase.storage.from("userImage").upload(userId + "/" + uuidv4, Buffer.from(file, 'base64'));
+        let buffer = Buffer.from(file, 'base64');
+        const uniquePath = `${userId}/${uuid.v4()}`;
+        console.log('Uploading to path:', uniquePath);
 
-        // if (error) {
-        //     console.log('Error uploading image:');
-        //     throw error;
-        // }
-
-        // console.log('Image uploaded successfully:', data);
+        const mimeType = mime.lookup(uri);
+        
+        if (typeof(mimeType) !== "string") {
+            Alert.alert("Invalid Image Type");
+        } else {
+            let { data, error } = await supabase.storage.from("userImage").upload(uniquePath, buffer, {
+                contentType: mimeType,
+            });
+            if (error) {
+                console.error('Error uploading image: ' + error);
+            }
+            console.log("Successfully Uploaded " + data);
+        }
     } catch (error) {
         throw error;
     }
@@ -37,7 +41,6 @@ const FetchProfile = async () => {
             console.log("Error fetching profile id");
         } else {
             let userId = profile[0].id;
-            // console.log(userId);
 
             return userId;
         }

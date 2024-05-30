@@ -1,6 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
 import { uploadOnePhoto } from './uploadOnePhoto';
-import { useState } from 'react';
 
 export const uploadFromImages = async () => {
     try {
@@ -14,12 +13,13 @@ export const uploadFromImages = async () => {
 
         if (!res.canceled) {
             let uri = res.assets[0].uri
-            console.log(uri);
             uploadOnePhoto(uri);
+            return uri;
         } else {
-            throw new Error('Image picking cancelled');
+            console.error('Image picking cancelled');
         }
     } catch (error) {
         console.error('Error during image upload:', error);
     }
+    return null;
 }

@@ -1,8 +1,8 @@
 import { Link } from "expo-router";
 import { Text, View } from "react-native";
-import StyleButton from "../../components/Buttons/StyleButton";
-import { grabEmail } from "../../functions/grabEmail";
-import { uploadFromImages } from "../../functions/photos/uploadFromImages";
+import StyleButton from "../../../components/Buttons/StyleButton";
+import { grabEmail } from "../../../functions/grabEmail";
+import { uploadFromImages } from "../../../functions/photos/uploadFromImages";
 
 export const HomePage = () => {
   let email = grabEmail();

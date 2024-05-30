@@ -1,10 +1,10 @@
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "../../../../lib/supabase";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
 //component
-import VendorCard from "../../../components/vendorCard";
-import VendorModal from "../../../components/vendorModal";
+import VendorCard from "../../../../components/vendorCard";
+import VendorModal from "../../../../components/vendorModal";
 
 const FetchVendor = () => {
   const [fetchError, setFetchError] = useState(null);

@@ -8,7 +8,10 @@ const EventPage: React.FC = () => {
   const router = useRouter();
 
   const handleCreateEvent = () => {
-    router.push('/add-event'); // Adjust the route as per your app structure
+    console.log('Create Event button pressed'); // Log button press
+    router.push('/add-event'); // This route should now match the file name in the pages directory
+    console.log('Create Event button pressed after router push'); // Log button press
+
   };
 
   return (

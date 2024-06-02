@@ -4,12 +4,14 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Pressable } from 
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../../lib/supabase';
 import EventCard from '../../../../components/eventCard';
+import { useAuth } from '../../../../context/auth';
 
 
 const EventPage: React.FC = () => {
   const [pastEvents, setPastEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const { session } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const router = useRouter();
@@ -17,8 +19,9 @@ const EventPage: React.FC = () => {
   const fetchEvents = async () => {
     const { data: events, error } = await supabase
       .from("events")
-      .select("*");
-  
+      .select("*")
+      .eq("userId", session.user.id);
+
     if (error) {
       console.error("Error fetching events:", error);
       return;
@@ -30,8 +33,9 @@ const EventPage: React.FC = () => {
     const upcomingEvents = events.filter(event => event.eventDate >= today);
     setPastEvents(pastEvents);
     setUpcomingEvents(upcomingEvents);
-    // console.log("Past events:", pastEvents);
-    // console.log("Future events:", upcomingEvents);
+    console.log("user id:", session.user.id);
+    console.log("Past events:", pastEvents);
+    console.log("Future events:", upcomingEvents);
   
     return { pastEvents, upcomingEvents };
   };
@@ -39,7 +43,7 @@ const EventPage: React.FC = () => {
   // const addNewItem = async (event) => {
   //   const { data: events, error } = await supabase
   //     .from("events")
-  //     .insert([{ eventName:  }]);
+  //     .insert([{ eventName: event }]);
   
   //   return events;
   // };

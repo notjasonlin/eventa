@@ -57,7 +57,7 @@ const EventPage: React.FC = () => {
 
   const handleCreateEvent = () => {
     //console.log('Create Event button pressed'); // Log button press
-    router.push('/add-event'); // This route should now match the file name in the pages directory
+    router.push('/eventForm'); // This route should now match the file name in the pages directory
     //console.log('Create Event button pressed after router push'); // Log button press
 
   };

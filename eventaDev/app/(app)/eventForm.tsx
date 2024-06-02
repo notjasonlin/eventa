@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { supabase } from '../lib/supabase'; // Adjust the import based on your project structure
-
+import { supabase } from '../../lib/supabase'; // Adjust the import based on your project structure
+import { useAuth } from '../../context/auth';
+import { router } from 'expo-router';
 
 const EventForm: React.FC = () => {
   const [eventType, setEventType] = useState<string>('');
@@ -13,29 +14,37 @@ const EventForm: React.FC = () => {
   const [location, setLocation] = useState<string>('Boston'); // Default to Boston
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+  const { session } = useAuth();
 
   const handleSubmit = async () => {
-    const eventTimeValue = eventTime ? eventTime.toISOString() : null;
-
+    const eventDateValue = eventDate.toISOString().split('T')[0]; // Get only the date part
+    const eventTimeValue = eventTime ? eventTime.toTimeString().split(' ')[0] : null; // Get only the time part if eventTime is not null
+  
     const { data, error } = await supabase
       .from('events')
       .insert([
         {
+          userId: session.user.id,
           eventType,
           eventName,
-          eventDate: eventDate.toISOString().split('T')[0], // Only the date part
+          eventDate: eventDateValue,
           eventTime: eventTimeValue,
           location
         }
       ]);
-
-    if (error) {
-      Alert.alert('Error', 'Error creating event: ' + error.message);
-    } else {
-      Alert.alert('Success', 'Event created successfully');
-      // Optionally, you can navigate back or clear the form here
-    }
-  };
+  
+      if (error) {
+        Alert.alert('Error', 'Error creating event: ' + error.message);
+      } else {
+        Alert.alert('Success', 'Event created successfully');
+        setEventType(''); // Clear form fields
+        setEventName('');
+        setEventDate(new Date());
+        setEventTime(null);
+        setLocation('Boston');
+        router.push('../event/fetchEvent');
+      }
+  };  
 
   const handleDateConfirm = (selectedDate: Date) => {
     setShowDatePicker(false);

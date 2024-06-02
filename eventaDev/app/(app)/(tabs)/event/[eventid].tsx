@@ -1,16 +1,57 @@
 // pages/EventPage.tsx
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { supabase } from '../../../../lib/supabase';
+import EventCard from '../../../../components/eventCard';
+
 
 const EventPage: React.FC = () => {
+  const [pastEvents, setPastEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [fetchError, setFetchError] = useState(null);
+
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const router = useRouter();
 
+  const fetchEvents = async () => {
+    const { data: events, error } = await supabase
+      .from("events")
+      .select("*");
+  
+    if (error) {
+      console.error("Error fetching events:", error);
+      return;
+    }
+  
+    const today = new Date().toISOString().split('T')[0];
+  
+    const pastEvents = events.filter(event => event.eventDate < today);
+    const upcomingEvents = events.filter(event => event.eventDate >= today);
+    setPastEvents(pastEvents);
+    setUpcomingEvents(upcomingEvents);
+    // console.log("Past events:", pastEvents);
+    // console.log("Future events:", upcomingEvents);
+  
+    return { pastEvents, upcomingEvents };
+  };
+
+  // const addNewItem = async (event) => {
+  //   const { data: events, error } = await supabase
+  //     .from("events")
+  //     .insert([{ eventName:  }]);
+  
+  //   return events;
+  // };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
   const handleCreateEvent = () => {
-    console.log('Create Event button pressed'); // Log button press
+    //console.log('Create Event button pressed'); // Log button press
     router.push('/add-event'); // This route should now match the file name in the pages directory
-    console.log('Create Event button pressed after router push'); // Log button press
+    //console.log('Create Event button pressed after router push'); // Log button press
 
   };
 
@@ -31,23 +72,43 @@ const EventPage: React.FC = () => {
           <Text style={activeTab === 'Past' ? styles.activeTabText : styles.inactiveTabText}>Past</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.noEventsContainer}>
-        {activeTab === 'Upcoming' ? (
-          <Text style={styles.noEventsText}>No upcoming events.</Text>
+      <View style={styles.container}>
+      {activeTab === 'Upcoming' ? (
+        upcomingEvents.length > 0 ? (
+          <View style={styles.eventsContainer}>
+            {upcomingEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </View>
         ) : (
-          <Text style={styles.noEventsText}>No past events.</Text>
-        )}
-      </View>
+          <View style={styles.noEventsContainer}>
+            <Text style={styles.noEventsText}>No upcoming events.</Text>
+          </View>
+        )
+      ) : (
+        pastEvents.length > 0 ? (
+          <View style={styles.eventsContainer}>
+            {pastEvents.map(event => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </View>
+        ) : (
+          <View style={styles.noEventsContainer}>
+            <Text style={styles.noEventsText}>No past events.</Text>
+          </View>
+        )
+      )}
       <TouchableOpacity style={styles.createButton} onPress={handleCreateEvent}>
         <Text style={styles.createButtonText}>Create a new event</Text>
       </TouchableOpacity>
+    </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flexGrow: 2,
     justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
@@ -86,6 +147,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 20,
+  },
+  eventsContainer: {
+    marginVertical: 1,
   },
   noEventsText: {
     fontSize: 18,

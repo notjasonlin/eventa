@@ -17,7 +17,7 @@ const EventForm: React.FC = () => {
   const handleSubmit = async () => {
     const eventTimeValue = eventTime ? eventTime.toISOString() : null;
 
-    const { data, error } = await supabase
+   const { data, error } = await supabase
       .from('events')
       .insert([
         {
@@ -26,7 +26,7 @@ const EventForm: React.FC = () => {
           eventDate: eventDate.toISOString().split('T')[0], // Only the date part
           eventTime: eventTimeValue,
           location
-        }
+        } 
       ]);
 
     if (error) {

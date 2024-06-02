@@ -23,11 +23,11 @@ export const HomePage = () => {
 
 
   return (
-    <View>
+    <View style={{flexDirection: "col"}}>
       <Text>Home Page</Text>
       <Text>{email}</Text>
       <StyleButton onPress={addImageButtonHandler}>Add image!</StyleButton>
-      <ImageButton uri={uri} />
+      <ImageButton uri={null} />
       {/* <Link href="/users/1">Go to user 1</Link>
       <Link href="/users/2">Go to user 2</Link>
       <Link href="/vendors/fetchVendor">Go to Marketplace</Link>

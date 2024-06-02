@@ -29,10 +29,13 @@ const EventPage: React.FC = () => {
   
     const today = new Date().toISOString().split('T')[0];
   
+    //filter by today's date
     const pastEvents = events.filter(event => event.eventDate < today);
     const upcomingEvents = events.filter(event => event.eventDate >= today);
+
     setPastEvents(pastEvents);
     setUpcomingEvents(upcomingEvents);
+
     console.log("user id:", session.user.id);
     console.log("Past events:", pastEvents);
     console.log("Future events:", upcomingEvents);

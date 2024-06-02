@@ -29,10 +29,13 @@ const EventPage: React.FC = () => {
   
     const today = new Date().toISOString().split('T')[0];
   
+    //filter by today's date
     const pastEvents = events.filter(event => event.eventDate < today);
     const upcomingEvents = events.filter(event => event.eventDate >= today);
+
     setPastEvents(pastEvents);
     setUpcomingEvents(upcomingEvents);
+
     console.log("user id:", session.user.id);
     console.log("Past events:", pastEvents);
     console.log("Future events:", upcomingEvents);
@@ -54,7 +57,7 @@ const EventPage: React.FC = () => {
 
   const handleCreateEvent = () => {
     //console.log('Create Event button pressed'); // Log button press
-    router.push('/add-event'); // This route should now match the file name in the pages directory
+    router.push('/eventForm'); // This route should now match the file name in the pages directory
     //console.log('Create Event button pressed after router push'); // Log button press
 
   };

@@ -3,13 +3,19 @@ import { StyleSheet, View, Alert } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
 import { supabase } from '../../../lib/supabase'
-import { useAuth } from '../../../context/auth'
+// import { useAuth } from '../../../store/auth'
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch, RootState } from '../../../store/redux/store'
+import { signOut } from "../../../store/redux/auth";
+
+
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
-  const { signOut } = useAuth();
+  const authSession = useSelector((state: RootState) => state.authentication);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (session) getProfile()
@@ -88,7 +94,7 @@ export default function Account({ session }: { session: Session }) {
       </View> */}
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => signOut()} />
+        <Button title="Sign Out" onPress={() => dispatch(signOut())} />
       </View>
     </View>
   )

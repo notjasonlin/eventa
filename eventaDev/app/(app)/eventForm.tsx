@@ -3,7 +3,9 @@ import { StyleSheet, View, Text, TextInput, Alert, TouchableOpacity } from 'reac
 import ModalSelector from 'react-native-modal-selector';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { supabase } from '../../lib/supabase'; // Adjust the import based on your project structure
-import { useAuth } from '../../context/auth';
+// import { useAuth } from '../../context/auth';
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/redux/store';
 import { router } from 'expo-router';
 
 const EventForm: React.FC = () => {
@@ -14,25 +16,28 @@ const EventForm: React.FC = () => {
   const [location, setLocation] = useState<string>('Boston'); // Default to Boston
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
-  const { session } = useAuth();
+  const session = useSelector((state: RootState) => state.authentication.session);
 
   const handleSubmit = async () => {
-    const eventDateValue = eventDate.toISOString().split('T')[0]; // Get only the date part
-    const eventTimeValue = eventTime ? eventTime.toTimeString().split(' ')[0] : null; // Get only the time part if eventTime is not null
-  
-    const { data, error } = await supabase
-      .from('events')
-      .insert([
-        {
-          userId: session.user.id,
-          eventType,
-          eventName,
-          eventDate: eventDateValue,
-          eventTime: eventTimeValue,
-          location
-        }
-      ]);
-  
+    if (session === null) {
+      console.error("Session is null!");
+    } else {
+      const eventDateValue = eventDate.toISOString().split('T')[0]; // Get only the date part
+      const eventTimeValue = eventTime ? eventTime.toTimeString().split(' ')[0] : null; // Get only the time part if eventTime is not null
+
+      const { data, error } = await supabase
+        .from('events')
+        .insert([
+          {
+            userId: session.user.id,
+            eventType,
+            eventName,
+            eventDate: eventDateValue,
+            eventTime: eventTimeValue,
+            location
+          }
+        ]);
+
       if (error) {
         Alert.alert('Error', 'Error creating event: ' + error.message);
       } else {
@@ -44,7 +49,8 @@ const EventForm: React.FC = () => {
         setLocation('Boston');
         router.push('../event/fetchEvent');
       }
-  };  
+    }
+  };
 
   const handleDateConfirm = (selectedDate: Date) => {
     setShowDatePicker(false);

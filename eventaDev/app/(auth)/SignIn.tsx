@@ -2,7 +2,9 @@ import React, { useState } from 'react'
 import { Alert, StyleSheet, View, AppState } from 'react-native'
 import { supabase } from '../../lib/supabase'
 import { Button, Input } from '@rneui/themed'
-import { useAuth } from '../../context/auth'
+import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch, RootState } from '../../store/redux/store'
+import { signIn, signUp } from "../../store/redux/auth";
 
 
 // Tells Supabase Auth to continuously refresh the session automatically
@@ -22,17 +24,18 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signIn, signUp } = useAuth();
+  const authSession = useSelector((state: RootState) => state.authentication);
+  const dispatch = useDispatch<AppDispatch>();
 
   async function signInWithEmail() {
     setLoading(true)
-    signIn(email, password);
+    dispatch(signIn({email, password}));
     setLoading(false)
   }
 
   async function signUpWithEmail() {
     setLoading(true)
-    signUp(email, password);
+    dispatch(signUp({email, password}));
     setLoading(false)
   }
 

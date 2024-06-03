@@ -4,43 +4,50 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Pressable } from 
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../../lib/supabase';
 import EventCard from '../../../../components/eventCard';
-import { useAuth } from '../../../../context/auth';
+import { useSelector } from "react-redux";
+import { RootState } from '../../../../store/redux/store';
+
 
 
 const EventPage: React.FC = () => {
-  const [pastEvents, setPastEvents] = useState([]);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState<any[]>([]); // Probably a better way of typing this
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const [fetchError, setFetchError] = useState(null);
-  const { session } = useAuth();
+  const session = useSelector((state: RootState) => state.authentication.session);
 
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const router = useRouter();
 
   const fetchEvents = async () => {
-    const { data: events, error } = await supabase
-      .from("events")
-      .select("*")
-      .eq("userId", session.user.id);
+    if (session === null) {
+      console.error("Session is null!");
+    } else {
+      const { data: events, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("userId", session.user.id);
 
-    if (error) {
-      console.error("Error fetching events:", error);
-      return;
+      if (error) {
+        console.error("Error fetching events:", error);
+        return;
+      }
+    
+  
+      const today = new Date().toISOString().split('T')[0];
+    
+      //filter by today's date
+      const pastEvents = events.filter(event => event.eventDate < today);
+      const upcomingEvents = events.filter(event => event.eventDate >= today);
+
+      setPastEvents(pastEvents);
+      setUpcomingEvents(upcomingEvents);
+
+      console.log("user id:", session.user.id);
+      console.log("Past events:", pastEvents);
+      console.log("Future events:", upcomingEvents);
+    
+      return { pastEvents, upcomingEvents };
     }
-  
-    const today = new Date().toISOString().split('T')[0];
-  
-    //filter by today's date
-    const pastEvents = events.filter(event => event.eventDate < today);
-    const upcomingEvents = events.filter(event => event.eventDate >= today);
-
-    setPastEvents(pastEvents);
-    setUpcomingEvents(upcomingEvents);
-
-    console.log("user id:", session.user.id);
-    console.log("Past events:", pastEvents);
-    console.log("Future events:", upcomingEvents);
-  
-    return { pastEvents, upcomingEvents };
   };
 
   // const addNewItem = async (event) => {

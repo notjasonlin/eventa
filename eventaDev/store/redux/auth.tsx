@@ -27,8 +27,8 @@ const authSlice = createSlice({
             .addCase(signUp.fulfilled, (state, action: PayloadAction<Session | null>) => {
                 state.session = action.payload;
             })
-            .addCase(signOut.fulfilled, (state) => {
-                state.session = null;
+            .addCase(signOut.fulfilled, (state, action: PayloadAction<null>) => {
+                state.session = action.payload;
             })
     },
 });

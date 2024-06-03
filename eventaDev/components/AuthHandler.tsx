@@ -2,7 +2,7 @@ import { React, useEffect } from "react";
 import { supabase } from '../lib/supabase';
 import { useRouter, useSegments } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState} from "../store/redux/store";
+import { AppDispatch, RootState } from "../store/redux/store";
 import { setSession } from "../store/redux/auth";
 
 

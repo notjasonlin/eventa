@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { useRouter } from "expo-router";
 import IconButton from "./IconButton";
+import { Link } from "expo-router";
 
 interface NavButtonProps {
     destination: string;
@@ -8,16 +9,10 @@ interface NavButtonProps {
 }
 
 const NavButton = ({ destination, icon }: NavButtonProps) => {
-    const router = useRouter();
-    
-    const navHandler = () => {
-        router.push(destination);
-    }
-    
     return (
-        <View style={{ flexDirection: 'row' }}>
-            <IconButton onPress={navHandler} icon={icon} />
-        </View>
+        <Link href={destination} style={{ flexDirection: 'row' }} asChild>
+            <IconButton icon={icon} />
+        </Link>
     );
 }
 

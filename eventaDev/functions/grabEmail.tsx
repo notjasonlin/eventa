@@ -12,15 +12,15 @@ export const grabEmail = () => {
 
             if (error) {
                 setFetchError(true);
-                console.log("Error fetching email");
+                // console.log("Error fetching email");
             } else {
                 if (email && email.length > 0) {
                     setEmail(email[0].email);
                 }
                 setFetchError(false);
-                console.log("Email fetched successfully");
+                // console.log("Email fetched successfully");
             }
-            console.log(email);
+            // console.log(email);
         };
 
         Fetch();

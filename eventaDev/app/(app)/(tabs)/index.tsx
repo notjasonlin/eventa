@@ -23,7 +23,7 @@ export const HomePage = () => {
 
 
   return (
-    <View style={{flexDirection: "col"}}>
+    <View style={{flexDirection: "column"}}>
       <Text>Home Page</Text>
       <Text>{email}</Text>
       <StyleButton onPress={addImageButtonHandler}>Add image!</StyleButton>

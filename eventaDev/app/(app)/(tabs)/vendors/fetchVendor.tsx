@@ -57,10 +57,10 @@ const FetchVendor = () => {
           numColumns={2}
         />
       }
-      <Pressable onPress={() => setShowModal(true)}>
+      {/* <Pressable onPress={() => setShowModal(true)}>
         <Text>Add Vendor</Text>
       </Pressable>
-      {showModal ? <VendorModal saveNewVendor={saveVendorType} hideModal={() => setShowModal(false)} /> : null}
+      {showModal ? <VendorModal saveNewVendor={saveVendorType} hideModal={() => setShowModal(false)} /> : null} */}
     </View>
   );
 };

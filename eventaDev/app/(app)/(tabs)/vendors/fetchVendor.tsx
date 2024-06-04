@@ -18,7 +18,7 @@ const FetchVendor = () => {
   const [showModal, setShowModal] = useState(false);
 
   const Fetch = async () => {
-    const { data, error } = await supabase
+    const { data: vendors, error } = await supabase
       .from("marketplace")
       .select("*");
 
@@ -41,7 +41,7 @@ const FetchVendor = () => {
       console.log("Error adding vendor:", error);
       return null;
     }
-    return data as unknown as Vendor[];
+    return vendors;
   };
 
 
@@ -60,7 +60,7 @@ const FetchVendor = () => {
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       {fetchError && <Text>{fetchError}</Text>}
       {!fetchError &&
         vendorTypes.length > 0 &&
@@ -88,9 +88,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     backgroundColor: "#f0f0f0", // Optional: adds a background color
-  },
-  list: {
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

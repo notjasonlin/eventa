@@ -1,6 +1,6 @@
 import { supabase } from "../../../../lib/supabase";
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, FlatList, StyleSheet } from "react-native";
 
 // Component imports
 import VendorCard from "../../../../components/vendorCard";
@@ -13,8 +13,8 @@ interface Vendor {
 }
 
 const FetchVendor = () => {
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [fetchError, setFetchError] = useState(null);
+  const [vendorTypes, setVendorTypes] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const Fetch = async () => {
@@ -26,29 +26,29 @@ const FetchVendor = () => {
       setFetchError("Error fetching vendor");
       console.log("Error fetching vendor:", error);
     } else {
-      setVendors(data as Vendor[]);
-      setFetchError(null);
+      setVendorTypes(vendors);
+      setFetchError(false);
       console.log("Vendor fetched successfully");
     }
   };
 
-  const addNewItem = async (vendorType: string) => {
-    const { data, error } = await supabase
+ const addNewItem = async (vendorType) => {
+    const { data: vendors, error } = await supabase
       .from("marketplace")
-      .insert([{ vendorType }]);
-
+      .insert([{ vendorType: vendorType }]);
+    
     if (error) {
       console.log("Error adding vendor:", error);
       return null;
     }
-
     return data as unknown as Vendor[];
   };
 
-  const saveVendor = (vendorType: string) => {
+
+  const saveVendorType = (vendorType) => {
     addNewItem(vendorType)
       .then(() => {
-        Fetch();
+        Fetch()
       })
       .catch((error) => {
         console.log("Error saving vendor:", error);
@@ -63,16 +63,34 @@ const FetchVendor = () => {
     <View>
       {fetchError && <Text>{fetchError}</Text>}
       {!fetchError &&
-        vendors.length > 0 &&
-        vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
-      <Pressable onPress={() => setShowModal(true)}>
+        vendorTypes.length > 0 &&
+        <FlatList
+          data={vendorTypes}
+          keyExtractor={(vendorType) => vendorType.id.toString()} // Ensures the key is a string
+          renderItem={({ item }) => <VendorCard vendor={item} />}
+          numColumns={2}
+        />
+      }
+      {/* <Pressable onPress={() => setShowModal(true)}>
         <Text>Add Vendor</Text>
       </Pressable>
-      {showModal ? (
-        <VendorModal saveNewVendor={saveVendor} hideModal={() => setShowModal(false)} />
-      ) : null}
+      {showModal ? <VendorModal saveNewVendor={saveVendorType} hideModal={() => setShowModal(false)} /> : null} */}
     </View>
   );
 };
 
 export default FetchVendor;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#f0f0f0", // Optional: adds a background color
+  },
+  list: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

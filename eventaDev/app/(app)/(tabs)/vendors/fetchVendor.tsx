@@ -2,9 +2,15 @@ import { supabase } from "../../../../lib/supabase";
 import { useEffect, useState } from "react";
 import { Pressable, Text, View, FlatList, StyleSheet } from "react-native";
 
-//component
+// Component imports
 import VendorCard from "../../../../components/vendorCard";
 import VendorModal from "../../../../components/vendorModal";
+
+// Define the type for the vendor
+interface Vendor {
+  id: number;
+  vendorType: string;
+}
 
 const FetchVendor = () => {
   const [fetchError, setFetchError] = useState(null);
@@ -12,13 +18,13 @@ const FetchVendor = () => {
   const [showModal, setShowModal] = useState(false);
 
   const Fetch = async () => {
-    const { data: vendors, error } = await supabase
+    const { data, error } = await supabase
       .from("marketplace")
       .select("*");
 
     if (error) {
-      setFetchError(true);
-      console.log("Error fetching vendor");
+      setFetchError("Error fetching vendor");
+      console.log("Error fetching vendor:", error);
     } else {
       setVendorTypes(vendors);
       setFetchError(false);
@@ -26,19 +32,27 @@ const FetchVendor = () => {
     }
   };
 
-  const addNewItem = async (vendorType) => {
+ const addNewItem = async (vendorType) => {
     const { data: vendors, error } = await supabase
       .from("marketplace")
       .insert([{ vendorType: vendorType }]);
-
-    return vendors
+    
+    if (error) {
+      console.log("Error adding vendor:", error);
+      return null;
+    }
+    return data as unknown as Vendor[];
   };
+
 
   const saveVendorType = (vendorType) => {
     addNewItem(vendorType)
       .then(() => {
         Fetch()
       })
+      .catch((error) => {
+        console.log("Error saving vendor:", error);
+      });
   };
 
   useEffect(() => {
@@ -46,8 +60,8 @@ const FetchVendor = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {fetchError && <Text>Error fetching vendor</Text>}
+    <View>
+      {fetchError && <Text>{fetchError}</Text>}
       {!fetchError &&
         vendorTypes.length > 0 &&
         <FlatList

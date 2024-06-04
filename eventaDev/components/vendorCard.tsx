@@ -1,12 +1,22 @@
+import React from 'react';
 import { View, Text, StyleSheet } from "react-native";
 import ImageButton from "./Buttons/ImageButton";
 import { Link } from "expo-router";
+        
+// Define the type for the vendor prop
+interface Vendor {
+  id: number;
+  vendorType: string;
+}
 
-const VendorCard = ({ vendor }) => {
+interface VendorCardProps {
+  vendor: Vendor;
+}
+
+const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
   const type = vendor.vendorType;
   const title = type.charAt(0).toUpperCase() + type.slice(1);
   const DEFAULT_IMAGE = `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png`
-
   return (
     <View style={styles.card}>
       <Link href={{ pathname: "/VendorPage", params: { type: type, title: title } }}

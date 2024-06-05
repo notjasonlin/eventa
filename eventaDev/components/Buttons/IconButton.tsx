@@ -1,25 +1,23 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
-import React from "react";
-
+import React, { forwardRef } from "react";
 
 interface IconButtonProps {
-    onPress?: () => void;
-    icon: React.ReactNode;
+  onPress?: () => void;
+  icon: React.ReactNode;
 }
 
-const IconButton = ({ icon, onPress }: IconButtonProps) => {
-    return (
-        <TouchableOpacity onPress={onPress} style={styles.container}>
-            {icon}
-        </TouchableOpacity>
-    );
-}
+const IconButton = forwardRef<TouchableOpacity, IconButtonProps>(({ icon, onPress }, ref) => {
+  return (
+    <TouchableOpacity onPress={onPress} style={styles.container} ref={ref}>
+      {icon}
+    </TouchableOpacity>
+  );
+});
 
 export default IconButton;
 
 const styles = StyleSheet.create({
-    container: {
-        // flex: 1,
-        marginHorizontal: 20,
-    }
-})
+  container: {
+    marginHorizontal: 20,
+  }
+});

@@ -11,6 +11,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-navigation/stack": "^6.3.29",
     "@reduxjs/toolkit": "^2.2.5",
     "@rneui/themed": "^4.0.0-rc.8",
     "@supabase/supabase-js": "^2.43.4",

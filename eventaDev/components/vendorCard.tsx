@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
 import ImageButton from "./Buttons/ImageButton";
 import { Link } from "expo-router";
-        
+
 // Define the type for the vendor prop
 interface Vendor {
   id: number;
@@ -16,16 +16,17 @@ interface VendorCardProps {
 const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
   const type = vendor.vendorType;
   const title = type.charAt(0).toUpperCase() + type.slice(1);
-  const DEFAULT_IMAGE = `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png`
+  const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png` };
   return (
-    <View style={styles.card}>
-      <Link href={{ pathname: "/VendorPage", params: { type: type, title: title } }}
-        asChild
-      >
-        <ImageButton uri={DEFAULT_IMAGE} />
-      </Link>
-      <Text style={styles.text}>{title}</Text>
-    </View>
+    <Link href={{ pathname: "/VendorPage", params: { type: type, title: title } }} asChild>
+      <TouchableOpacity style={styles.card}>
+        <View>
+          <ImageBackground source={DEFAULT_IMAGE} style={styles.imageBackground}>
+            <Text style={styles.text}>{title}</Text>
+          </ImageBackground>
+        </View>
+      </TouchableOpacity>
+    </Link>
   );
 };
 
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   card: {
     borderColor: "#60d8ba",
     borderRadius: 15,
-    borderWidth: 1,
+    borderWidth: 2,
     height: 150,
     width: 150,
     justifyContent: "center",
@@ -43,7 +44,23 @@ const styles = StyleSheet.create({
     padding: 10,
     margin: 10,
   },
+  imageBackground: {
+    width: 140,
+    height: 140,
+    resizeMode: "cover",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    borderRadius: 10,
+    overflow: "hidden",
+    opacity: 0.88,
+  },
   text: {
     textAlign: "center",
-  }
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
+    // backgroundColor: "#60d8ba",
+    // borderRadius: 4,
+    // overflow: "hidden",
+  },
 });

@@ -13,9 +13,9 @@ interface Vendor {
 }
 
 const FetchVendor = () => {
-  const [fetchError, setFetchError] = useState(null);
-  const [vendorTypes, setVendorTypes] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [fetchError, setFetchError] = useState<String | null>(null);
+  const [vendorTypes, setVendorTypes] = useState<Vendor[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const Fetch = async () => {
     const { data: vendors, error } = await supabase
@@ -27,12 +27,13 @@ const FetchVendor = () => {
       console.log("Error fetching vendor:", error);
     } else {
       setVendorTypes(vendors);
-      setFetchError(false);
+      setFetchError(null);
+      console.log(vendors);
       console.log("Vendor fetched successfully");
     }
   };
 
- const addNewItem = async (vendorType) => {
+ const addNewItem = async (vendorType: string) => {
     const { data: vendors, error } = await supabase
       .from("marketplace")
       .insert([{ vendorType: vendorType }]);
@@ -45,7 +46,7 @@ const FetchVendor = () => {
   };
 
 
-  const saveVendorType = (vendorType) => {
+  const saveVendorType = (vendorType: string) => {
     addNewItem(vendorType)
       .then(() => {
         Fetch()

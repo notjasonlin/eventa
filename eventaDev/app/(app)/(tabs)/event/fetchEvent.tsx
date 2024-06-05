@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '../../../../lib/supabase';
-import EventCard from '../../event_files/eventCard';
+import EventCard from '../../(event_files)/eventCard';
 import { useSelector } from "react-redux";
 import { RootState } from '../../../../store/redux/store';
 
@@ -54,7 +54,7 @@ const EventPage: React.FC = () => {
   }, []);
 
   const handleCreateEvent = () => {
-    router.push('/event_files/eventForm');
+    router.push('/(event_files)/eventForm');
   };
 
   return (

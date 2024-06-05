@@ -18,7 +18,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const router = useRouter();
 
   const handlePress = () => {
-    router.push(`/event_files/${event.id}`);
+    router.push(`/(event_files)/${event.id}`);
   };
 
   return (

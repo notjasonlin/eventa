@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, Button, Pressable } from "react-native";
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
+import { deleteEvent } from "../../../functions/deleteEvent";
 
 interface Event {
   id: number;
@@ -15,6 +16,7 @@ interface Event {
 const EventDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
   const [event, setEvent] = useState<Event | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -42,6 +44,14 @@ const EventDetails: React.FC = () => {
     );
   }
 
+  const handleDelete = async () => {
+    if (typeof (id) === "string") {
+      await deleteEvent(id);
+      router.replace("/(tabs)/event/fetchEvent");
+      // router.back();
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{event.eventName}</Text>
@@ -49,6 +59,9 @@ const EventDetails: React.FC = () => {
       <Text style={styles.details}>Time: {event.eventTime}</Text>
       <Text style={styles.details}>Location: {event.location}</Text>
       <Text style={styles.details}>Description: {event.description}</Text>
+      <Pressable onPress={handleDelete}>
+        <Text>Delete</Text>
+      </Pressable>
     </View>
   );
 };

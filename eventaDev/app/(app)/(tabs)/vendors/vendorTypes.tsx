@@ -1,16 +1,12 @@
-import { supabase } from "../../../../lib/supabase";
+// app/(app)/(tabs)/vendor/FetchVendor.tsx
 import { useEffect, useState } from "react";
 import { Pressable, Text, View, FlatList, StyleSheet } from "react-native";
 
 // Component imports
 import VendorCard from "../../../../components/vendorCard";
 import VendorModal from "../../../../components/vendorModal";
-
-// Define the type for the vendor
-interface Vendor {
-  id: number;
-  vendorType: string;
-}
+import { fetchVendors, addNewItem } from "../../../../functions/vendorFunctions";
+import { Vendor } from "../../(vendor_files)/vendorInterface";
 
 const FetchVendor = () => {
   const [fetchError, setFetchError] = useState<String | null>(null);
@@ -18,38 +14,20 @@ const FetchVendor = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const Fetch = async () => {
-    const { data: vendors, error } = await supabase
-      .from("marketplace")
-      .select("*");
+    const { vendors, error } = await fetchVendors();
 
     if (error) {
-      setFetchError("Error fetching vendor");
-      console.log("Error fetching vendor:", error);
+      setFetchError(error);
     } else {
       setVendorTypes(vendors);
       setFetchError(null);
-      console.log(vendors);
-      console.log("Vendor fetched successfully");
     }
   };
-
- const addNewItem = async (vendorType: string) => {
-    const { data: vendors, error } = await supabase
-      .from("marketplace")
-      .insert([{ vendorType: vendorType }]);
-    
-    if (error) {
-      console.log("Error adding vendor:", error);
-      return null;
-    }
-    return vendors;
-  };
-
 
   const saveVendorType = (vendorType: string) => {
     addNewItem(vendorType)
       .then(() => {
-        Fetch()
+        Fetch();
       })
       .catch((error) => {
         console.log("Error saving vendor:", error);

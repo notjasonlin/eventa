@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, Alert, TouchableOpacity } from 'reac
 import ModalSelector from 'react-native-modal-selector';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { supabase } from '../../../lib/supabase'; // Adjust the import based on your project structure
-// import { useAuth } from '../../context/auth';
+//import { useAuth } from '../../context/auth';
 import { useSelector } from "react-redux";
 import { RootState } from '../../../store/redux/store';
 import { router } from 'expo-router';

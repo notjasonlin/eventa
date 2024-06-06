@@ -18,7 +18,7 @@ const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
   const title = type.charAt(0).toUpperCase() + type.slice(1);
   const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png` };
   return (
-    <Link href={{ pathname: "/VendorPage", params: { type: type, title: title } }} asChild>
+    <Link href={{ pathname: "(vendor_files)/VendorPage", params: { type: type, title: title } }} asChild>
       <TouchableOpacity style={styles.card}>
         <View>
           <ImageBackground source={DEFAULT_IMAGE} style={styles.imageBackground}>

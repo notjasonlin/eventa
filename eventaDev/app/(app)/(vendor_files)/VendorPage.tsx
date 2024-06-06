@@ -1,6 +1,6 @@
 import { View, Text, FlatList } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 import { useEffect, useLayoutEffect, useState } from "react";
 
 const VendorPage = () => {

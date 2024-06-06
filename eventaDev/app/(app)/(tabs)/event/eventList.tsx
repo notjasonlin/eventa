@@ -31,7 +31,7 @@ const EventPage: React.FC = () => {
   }, [session]);
 
   const handleCreateEvent = () => {
-    router.push('/event_files/eventForm');
+    router.push('/(event_files)/eventForm');
   };
 
   return (

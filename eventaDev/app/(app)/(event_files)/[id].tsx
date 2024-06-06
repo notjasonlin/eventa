@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import { deleteEvent } from "../../../functions/deleteEvent";
@@ -88,15 +88,16 @@ const EventDetails: React.FC = () => {
       }
     }
 
-    Alert.alert("Delete this event?", "Deleted events cannot be recovered", [
+    Alert.alert("Delete this event?", "This event cannot be recovered if deleted", [
       {
         text: "Delete",
         onPress: deleteProceed,
-        style: "cancel",
+        style: "destructive",
       },
       {
         text: "Cancel",
         onPress: () => console.log("Operation canceled"),
+        style: "cancel",
       },
     ])
   }
@@ -188,6 +189,7 @@ const EventDetails: React.FC = () => {
           <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={handleDeleteEvent}>
             <Text style={styles.buttonText}>Delete Event</Text>
           </TouchableOpacity>
+          <ActivityIndicator size="large" animating={isLoading}/>
         </>
       )}
     </View>

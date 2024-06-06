@@ -25,6 +25,7 @@ const EventDetails: React.FC = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -78,11 +79,27 @@ const EventDetails: React.FC = () => {
   };
 
   const handleDeleteEvent = async () => {
-    if (typeof (id) === "string") {
-      await deleteEvent(id);
-      router.replace("/(tabs)/event/fetchEvent");
+    const deleteProceed = async () => {
+      if (typeof (id) === "string") {
+        setIsLoading(true);
+        await deleteEvent(id);
+        setIsLoading(false);
+        router.replace("/(tabs)/event/fetchEvent");
+      }
     }
-  };
+
+    Alert.alert("Delete this event?", "Deleted events cannot be recovered", [
+      {
+        text: "Delete",
+        onPress: deleteProceed,
+        style: "cancel",
+      },
+      {
+        text: "Cancel",
+        onPress: () => console.log("Operation canceled"),
+      },
+    ])
+  }
 
   const handleChange = (name: keyof Event, value: string) => {
     if (formData) {

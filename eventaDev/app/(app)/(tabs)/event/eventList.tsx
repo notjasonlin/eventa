@@ -2,18 +2,11 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { supabase } from '../../../../lib/supabase';
 import EventCard from '../../(event_files)/eventCard';
 import { useSelector } from "react-redux";
 import { RootState } from '../../../../store/redux/store';
-
-interface Event {
-  id: number;
-  eventName: string;
-  eventDate: string;
-  eventTime: string;
-  location: string;
-}
+import { fetchEvents } from '../../../../functions/fetchEvent';
+import { Event } from '../../(event_files)/eventInterface';
 
 const EventPage: React.FC = () => {
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
@@ -24,37 +17,21 @@ const EventPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const router = useRouter();
 
-  const fetchEvents = async () => {
-    if (!session) {
-      console.error("Session is null!");
-      return;
-    }
-    
-    const { data: events, error } = await supabase
-      .from("events")
-      .select("*")
-      .eq("userId", session.user.id);
-
-    if (error) {
-      console.error("Error fetching events:", error);
-      return;
-    }
-    
-    const today = new Date().toISOString().split('T')[0];
-
-    const pastEvents = events.filter((event: Event) => event.eventDate < today);
-    const upcomingEvents = events.filter((event: Event) => event.eventDate >= today);
-
-    setPastEvents(pastEvents);
-    setUpcomingEvents(upcomingEvents);
-  };
-
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (session) {
+      fetchEvents(session.user.id)
+        .then(({ pastEvents, upcomingEvents }) => {
+          setPastEvents(pastEvents);
+          setUpcomingEvents(upcomingEvents);
+        })
+        .catch(error => setFetchError(error.message));
+    } else {
+      console.error("Session is null!");
+    }
+  }, [session]);
 
   const handleCreateEvent = () => {
-    router.push('/(event_files)/eventForm');
+    router.push('/event_files/eventForm');
   };
 
   return (

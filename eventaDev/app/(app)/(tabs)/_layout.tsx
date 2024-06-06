@@ -40,7 +40,7 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="event/fetchEvent"
+        name="event/eventList"
         options={{
           headerTitle: "Event Page",
           title: "Events",

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, Pressable } from "react-native";
+import { View, Text, StyleSheet, Button, Pressable, Alert, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 import { deleteEvent } from "../../../functions/deleteEvent";
+import CancelAlert from "../../../components/CancelAlert";
 
 interface Event {
   id: number;
@@ -17,6 +18,7 @@ const EventDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
   const [event, setEvent] = useState<Event | null>(null);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -45,11 +47,27 @@ const EventDetails: React.FC = () => {
   }
 
   const handleDelete = async () => {
-    if (typeof (id) === "string") {
-      await deleteEvent(id);
-      router.replace("/(tabs)/event/fetchEvent");
-      // router.back();
+    const deleteProceed = async () => {
+      if (typeof (id) === "string") {
+        setIsLoading(true);
+        await deleteEvent(id);
+        setIsLoading(false);
+        router.replace("/(tabs)/event/fetchEvent");
+        // router.back();
+      }
     }
+
+    Alert.alert("Delete this event?", "Deleted events cannot be recovered", [
+      {
+        text: "Delete",
+        onPress: deleteProceed,
+        style: "cancel",
+      },
+      {
+        text: "Cancel",
+        onPress: () => console.log("Operation canceled"),
+      },
+    ])
   }
 
   return (
@@ -62,6 +80,7 @@ const EventDetails: React.FC = () => {
       <Pressable onPress={handleDelete}>
         <Text>Delete</Text>
       </Pressable>
+      <ActivityIndicator size="large" animating={isLoading}/>
     </View>
   );
 };

@@ -55,38 +55,80 @@ const EventDetails: React.FC = () => {
   }
 
   const handleUpdateEvent = async () => {
-    if (formData) {
-      const { data, error } = await supabase
-        .from("events")
-        .update({
-          eventType: formData.eventType,
-          eventName: formData.eventName,
-          eventDate: formData.eventDate,
-          eventTime: formData.eventTime,
-          location: formData.location,
-          description: formData.description,
-        })
-        .eq("id", id);
+  if (formData) {
+    console.log("Form data:", formData);
+    console.log("Event ID:", id);
 
-      if (error) {
-        console.error("Error updating event:", error);
-      } else if (data) {
-        setEvent(data[0]);
-        setIsEditing(false);
-        Alert.alert('Success', 'Event updated successfully');
-      }
+    // Check if the record exists
+    const { data: existingData, error: fetchError } = await supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching event:", fetchError);
+      Alert.alert("Error", "Failed to fetch the event details.");
+      return;
     }
-  };
+
+    if (!existingData) {
+      console.error("Event not found with ID:", id);
+      Alert.alert("Error", "Event not found.");
+      return;
+    }
+
+    console.log("Existing event data:", existingData);
+
+    // Proceed with the update if the record exists
+    const { data, error } = await supabase
+      .from("events")
+      .update({
+        eventType: formData.eventType,
+        eventName: formData.eventName,
+        eventDate: formData.eventDate,
+        eventTime: formData.eventTime,
+        location: formData.location,
+        description: formData.description,
+      })
+      .eq("id", id)
+      .select(); // Make sure to select the updated record
+
+    console.log("Update response data:", data);
+    console.log("Update response error:", error);
+
+    if (error) {
+      console.error("Error updating event:", error);
+      Alert.alert("Error", "Failed to update the event.");
+    } else if (data && data.length > 0) {
+      console.log("hi1");
+      setEvent(data[0]);
+      setIsEditing(false);
+      console.log("Event updated");
+      Alert.alert("Event Updated", "The event has been updated successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)/event/eventList"),
+        },
+      ]);
+      console.log("After event");
+    } else {
+      console.log("No data returned from update or data is empty");
+      Alert.alert("Error", "No data returned from update.");
+    }
+  }
+};
+
 
   const handleDeleteEvent = async () => {
     const deleteProceed = async () => {
-      if (typeof (id) === "string") {
+      if (typeof id === "string") {
         setIsLoading(true);
         await deleteEvent(id);
         setIsLoading(false);
         router.replace("/(tabs)/event/eventList");
       }
-    }
+    };
 
     Alert.alert("Delete this event?", "Event cannot be recovered if deleted", [
       {
@@ -99,8 +141,8 @@ const EventDetails: React.FC = () => {
         onPress: () => console.log("Operation canceled"),
         style: "cancel",
       },
-    ])
-  }
+    ]);
+  };
 
   const handleChange = (name: keyof Event, value: string) => {
     if (formData) {

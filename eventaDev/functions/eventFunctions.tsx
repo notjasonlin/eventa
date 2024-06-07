@@ -19,3 +19,15 @@ export const fetchEvents = async (userId: string): Promise<{ pastEvents: Event[]
 
   return { pastEvents, upcomingEvents };
 };
+
+export const deleteEvent = async (id: string) => {
+    const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error("Error deleting event:", error);
+    }
+
+}

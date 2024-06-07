@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import EventCard from '../../(event_files)/eventCard';
 import { useSelector } from "react-redux";
 import { RootState } from '../../../../store/redux/store';
-import { fetchEvents } from '../../../../functions/fetchEvent';
+import { fetchEvents } from '../../../../functions/eventFunctions';
 import { Event } from '../../(event_files)/eventInterface';
 
 const EventPage: React.FC = () => {

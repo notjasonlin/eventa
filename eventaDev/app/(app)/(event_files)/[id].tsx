@@ -87,7 +87,6 @@ const EventDetails: React.FC = () => {
         router.replace("/(tabs)/event/eventList");
       }
     }
-
     Alert.alert("Delete this event?", "Event cannot be recovered if deleted", [
       {
         text: "Delete",

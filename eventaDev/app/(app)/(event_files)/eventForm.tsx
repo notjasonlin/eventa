@@ -47,7 +47,7 @@ const EventForm: React.FC = () => {
         setEventDate(new Date());
         setEventTime(null);
         setLocation('Boston');
-        router.push('../event/fetchEvent');
+        router.push('../event/eventList');
       }
     }
   };

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
-import { deleteEvent } from "../../../functions/deleteEvent";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { deleteEvent } from "../../../functions/eventFunctions";
 
 interface Event {
   id: number;
@@ -84,11 +84,11 @@ const EventDetails: React.FC = () => {
         setIsLoading(true);
         await deleteEvent(id);
         setIsLoading(false);
-        router.replace("/(tabs)/event/fetchEvent");
+        router.replace("/(tabs)/event/eventList");
       }
     }
 
-    Alert.alert("Delete this event?", "This event cannot be recovered if deleted", [
+    Alert.alert("Delete this event?", "Event cannot be recovered if deleted", [
       {
         text: "Delete",
         onPress: deleteProceed,

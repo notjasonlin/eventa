@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { Pressable, Text, View, FlatList, StyleSheet } from "react-native";
 
 // Component imports
-import VendorCard from "../../../../components/vendorCard";
-import VendorModal from "../../../../components/vendorModal";
+import VendorCard from "../../../../components/vendor/vendorCard";
+import VendorModal from "../../../../components/vendor/vendorModal";
 import { fetchVendors, addNewItem } from "../../../../functions/vendorFunctions";
 import { Vendor } from "../../(vendor_files)/vendorInterface";
 

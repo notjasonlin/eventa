@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
-import ImageButton from "./Buttons/ImageButton";
+import ImageButton from "../Buttons/ImageButton";
 import { Link } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Define the type for the vendor prop
 interface Vendor {
@@ -14,15 +15,22 @@ interface VendorCardProps {
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
-  const type = vendor.vendorType;
-  const title = type.charAt(0).toUpperCase() + type.slice(1);
+  const type: string = vendor.vendorType;
+  const title: string = type.charAt(0).toUpperCase() + type.slice(1);
   const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png` };
   return (
-    <Link href={{ pathname: "(vendor_files)/VendorPage", params: { type: type, title: title } }} asChild>
+    <Link href={{ pathname: "(vendor_files)/VendorTypePage", params: { type: type, title: title } }} asChild>
       <TouchableOpacity style={styles.card}>
         <View>
           <ImageBackground source={DEFAULT_IMAGE} style={styles.imageBackground}>
-            <Text style={styles.text}>{title}</Text>
+            <LinearGradient
+              colors={['#00000000', '#000000']}
+              style={{ height: '100%', width: '100%' }}
+              start={{ x: 0.5, y: 0.5 }}
+              end={{ x: 0.5, y: 1 }} />
+            <View style={styles.textContainer}>
+              <Text style={styles.text}>{title}</Text>
+            </View>
           </ImageBackground>
         </View>
       </TouchableOpacity>
@@ -52,7 +60,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     overflow: "hidden",
-    opacity: 0.88,
+    // opacity: 0.88,
+  },
+  textContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent', // Make background transparent to see gradient through text
+    alignItems: 'center',
   },
   text: {
     textAlign: "center",

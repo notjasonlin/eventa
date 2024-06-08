@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
-import ImageButton from "./Buttons/ImageButton";
+import ImageButton from "../Buttons/ImageButton";
 import { Link } from "expo-router";
 
 // Define the type for the vendor prop
@@ -14,11 +14,11 @@ interface VendorCardProps {
 }
 
 const VendorCard: React.FC<VendorCardProps> = ({ vendor }) => {
-  const type = vendor.vendorType;
-  const title = type.charAt(0).toUpperCase() + type.slice(1);
+  const type: string = vendor.vendorType;
+  const title: string = type.charAt(0).toUpperCase() + type.slice(1);
   const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/${type}/default.png` };
   return (
-    <Link href={{ pathname: "(vendor_files)/VendorPage", params: { type: type, title: title } }} asChild>
+    <Link href={{ pathname: "(vendor_files)/VendorTypePage", params: { type: type, title: title } }} asChild>
       <TouchableOpacity style={styles.card}>
         <View>
           <ImageBackground source={DEFAULT_IMAGE} style={styles.imageBackground}>

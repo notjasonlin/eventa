@@ -2,10 +2,12 @@ import { View, Text, FlatList } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import { useEffect, useLayoutEffect, useState } from "react";
+import { GenericVendor } from "./genericVendorInterface";
+import VendorBar from "../../../components/vendor/VendorBar";
 
-const VendorPage = () => {
-    const [fetchError, setFetchError] = useState(null);
-    const [vendors, setVendors] = useState([]);
+const VendorTypePage = () => {
+    const [fetchError, setFetchError] = useState<boolean | null>(null);
+    const [vendors, setVendors] = useState<GenericVendor[]>([]);
     const { type, title } = useLocalSearchParams();
     const navigation = useNavigation();
 
@@ -16,7 +18,7 @@ const VendorPage = () => {
     }, [navigation]);
 
     const Fetch = async () => {
-        if (typeof (type) === "string") {
+        if (typeof (type) === "string") { // Hate this appraoch
             const { data: vendorsData, error } = await supabase
                 .from(type)
                 .select("*");
@@ -41,14 +43,17 @@ const VendorPage = () => {
     }, []);
 
     return (
-        <View style={{ alignContent: "center" }}>
+        <View style={{ alignContent: "center", flex: 1 }}>
             {vendors && <FlatList
                 data={vendors}
                 keyExtractor={(vendor) => vendor.id.toString()} // Ensures the key is a string
-                renderItem={({ item }) => <Text>{item.name}</Text>}
+                renderItem={({ item }) => {
+                    if (typeof(type) === "string") return <VendorBar vendor={item} type={type} /> // Hate this appraoch
+                    else return <Text>Invalid type</Text>
+                }}
             />}
         </View>
     );
 }
 
-export default VendorPage;
+export default VendorTypePage;

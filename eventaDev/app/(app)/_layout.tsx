@@ -1,6 +1,8 @@
 import { Stack } from "expo-router";
 import NavButton from "../../components/Buttons/NavButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { TransitionPresets } from '@react-navigation/stack';
+
 
 const RootLayout = () => {
     return (
@@ -9,6 +11,7 @@ const RootLayout = () => {
                 name="(tabs)"
                 options={{
                     headerShown: false,
+                    animation: "slide_from_left",
                 }}
             />
             {/* <Stack.Screen
@@ -31,6 +34,12 @@ const RootLayout = () => {
                             icon={<AntDesign name="left" size={24} color="black"/>}
                         />
                       ),
+                }}
+            />
+            <Stack.Screen
+                name="(event_files)/[id]"
+                options={{
+                    headerShown: false,
                 }}
             /> */}
         </Stack>

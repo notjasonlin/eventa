@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { StyleSheet, View, AppState } from 'react-native'
 import { supabase } from '../../lib/supabase'
 import { Button, Input } from '@rneui/themed'
-import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from '../../store/redux/store'
+import { useDispatch } from "react-redux";
+import { AppDispatch } from '../../store/redux/store'
 import { signIn, signUp } from "../../store/redux/auth";
 
 
@@ -24,7 +24,6 @@ export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const authSession = useSelector((state: RootState) => state.authentication);
   const dispatch = useDispatch<AppDispatch>();
 
   async function signInWithEmail() {

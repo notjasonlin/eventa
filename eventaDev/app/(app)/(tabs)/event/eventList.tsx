@@ -7,14 +7,14 @@ import { fetchEvents } from '../../../../functions/eventFunctions';
 import { Event } from '../../(event_files)/eventInterface';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from '../../../../store/redux/store';
-import { setEvents } from '../../../../store/redux/events';
+import { setEvents, setUpcomingEvents, setPastEvents } from '../../../../store/redux/events';
 
 const EventPage: React.FC = () => {
-  const [pastEvents, setPastEvents] = useState<Event[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const session = useSelector((state: RootState) => state.authentication.session);
   const events = useSelector((state: RootState) => state.currentEvents.events);
+  const upcomingEvents = useSelector((state: RootState) => state.currentEvents.upcomingEvents);
+  const pastEvents = useSelector((state: RootState) => state.currentEvents.pastEvents);
   const dispatch = useDispatch<AppDispatch>();
 
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
@@ -25,8 +25,8 @@ const EventPage: React.FC = () => {
       fetchEvents(session.user.id)
         .then(({ events, pastEvents, upcomingEvents }) => {
           dispatch(setEvents(events));
-          setPastEvents(pastEvents);
-          setUpcomingEvents(upcomingEvents);
+          dispatch(setPastEvents(pastEvents));
+          dispatch(setUpcomingEvents(upcomingEvents));
         })
         .catch(error => setFetchError(error.message));
     } else {
@@ -57,7 +57,7 @@ const EventPage: React.FC = () => {
       </View>
       <View style={styles.container}>
         {activeTab === 'Upcoming' ? (
-          upcomingEvents.length > 0 ? (
+          (upcomingEvents && upcomingEvents.length > 0) ? (
             <View style={styles.eventsContainer}>
               {upcomingEvents.map(event => (
                 <EventCard key={event.id} event={event} />
@@ -69,7 +69,7 @@ const EventPage: React.FC = () => {
             </View>
           )
         ) : (
-          pastEvents.length > 0 ? (
+          (pastEvents && pastEvents.length > 0) ? (
             <View style={styles.eventsContainer}>
               {pastEvents.map(event => (
                 <EventCard key={event.id} event={event} />

@@ -4,9 +4,13 @@ import ModalSelector from 'react-native-modal-selector';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { supabase } from '../../../lib/supabase'; // Adjust the import based on your project structure
 //import { useAuth } from '../../context/auth';
-import { useSelector } from "react-redux";
-import { RootState } from '../../../store/redux/store';
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from '../../../store/redux/store';
+import { setEvents } from '../../../store/redux/events';
 import { router } from 'expo-router';
+import uuid from 'react-native-uuid'; 
+
+
 
 const EventForm: React.FC = () => {
   const [eventType, setEventType] = useState<string>('');
@@ -17,6 +21,7 @@ const EventForm: React.FC = () => {
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
   const session = useSelector((state: RootState) => state.authentication.session);
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = async () => {
     if (session === null) {
@@ -29,6 +34,7 @@ const EventForm: React.FC = () => {
         .from('events')
         .insert([
           {
+            id: uuid.v4(),
             userId: session.user.id,
             eventType,
             eventName,
@@ -41,13 +47,15 @@ const EventForm: React.FC = () => {
       if (error) {
         Alert.alert('Error', 'Error creating event: ' + error.message);
       } else {
+        dispatch(setEvents(null));
         Alert.alert('Success', 'Event created successfully');
         setEventType(''); // Clear form fields
         setEventName('');
         setEventDate(new Date());
         setEventTime(null);
         setLocation('Boston');
-        router.push('../event/eventList');
+        // router.push('../event/eventList');
+        router.back();
       }
     }
   };

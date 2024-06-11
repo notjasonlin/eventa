@@ -3,16 +3,19 @@ import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import EventCard from '../../(event_files)/eventCard';
-import { useSelector } from "react-redux";
-import { RootState } from '../../../../store/redux/store';
 import { fetchEvents } from '../../../../functions/eventFunctions';
 import { Event } from '../../(event_files)/eventInterface';
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from '../../../../store/redux/store';
+import { setEvents } from '../../../../store/redux/events';
 
 const EventPage: React.FC = () => {
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const session = useSelector((state: RootState) => state.authentication.session);
+  const events = useSelector((state: RootState) => state.currentEvents.events);
+  const dispatch = useDispatch<AppDispatch>();
 
   const [activeTab, setActiveTab] = useState<'Upcoming' | 'Past'>('Upcoming');
   const router = useRouter();
@@ -20,7 +23,8 @@ const EventPage: React.FC = () => {
   useEffect(() => {
     if (session) {
       fetchEvents(session.user.id)
-        .then(({ pastEvents, upcomingEvents }) => {
+        .then(({ events, pastEvents, upcomingEvents }) => {
+          dispatch(setEvents(events));
           setPastEvents(pastEvents);
           setUpcomingEvents(upcomingEvents);
         })
@@ -28,7 +32,7 @@ const EventPage: React.FC = () => {
     } else {
       console.error("Session is null!");
     }
-  }, [session]);
+  }, [session, events]);
 
   const handleCreateEvent = () => {
     router.push('/(event_files)/eventForm');

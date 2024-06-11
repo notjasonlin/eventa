@@ -4,6 +4,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { deleteEvent } from "../../../functions/eventFunctions";
+import { UseDispatch, useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store/redux/store";
+import { setEvents } from "../../../store/redux/events";
 
 interface Event {
   id: number;
@@ -26,6 +29,7 @@ const EventDetails: React.FC = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -103,12 +107,13 @@ const EventDetails: React.FC = () => {
     } else if (data && data.length > 0) {
       console.log("hi1");
       setEvent(data[0]);
+      dispatch(setEvents(null)); // Sets events redux to null to force useEffect in eventList to rerender the events 
       setIsEditing(false);
       console.log("Event updated");
       Alert.alert("Event Updated", "The event has been updated successfully!", [
         {
           text: "OK",
-          onPress: () => router.replace("/(tabs)/event/eventList"),
+          onPress: () => router.back(), // router.replace("/(tabs)/event/eventList")
         },
       ]);
       console.log("After event");
@@ -125,10 +130,13 @@ const EventDetails: React.FC = () => {
       if (typeof id === "string") {
         setIsLoading(true);
         await deleteEvent(id);
+        dispatch(setEvents(null));
         setIsLoading(false);
-        router.replace("/(tabs)/event/eventList");
+        // router.replace("/(tabs)/event/eventList");
+        router.back();
       }
     }
+
     Alert.alert("Delete this event?", "Event cannot be recovered if deleted", [
       {
         text: "Delete",

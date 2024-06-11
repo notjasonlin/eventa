@@ -3,10 +3,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store/redux/store";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from '@expo/vector-icons';
+import { bookVendor } from '../../../functions/bookVendor';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
     const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/venues/default.png` };
+
+    const handleBook = () => {
+        
+    }
 
     return (
         <View style={styles.container}>

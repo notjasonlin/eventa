@@ -4,30 +4,29 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { deleteEvent } from "../../../functions/eventFunctions";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store/redux/store";
 import { setEvents } from "../../../store/redux/events";
 import { readBookedVendorByEvent } from "../../../functions/bookedVendorFunctions";
-import { GenericVendor } from "../(vendor_files)/genericVendorInterface";
 import { Event } from "./eventInterface";
-import { BookedVendor } from "../(vendor_files)/bookedVendorInterface";
 import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions";
 import BookedVendorCard from "../../../components/BookedVendorCard";
+import { setEvent, setBookedVendors, setVenues, setCatering, 
+  setPhotographers, setEntertainment, setDecoration} from "../../../store/redux/event";
 
 const EventDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
-  const [event, setEvent] = useState<Event | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Event | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-
-  const [bookedVendors, setBookedVendors] = useState<BookedVendor[] | null>(null);
-  const [venues, setVenues] = useState<GenericVendor[] | null>(null);
-  const [catering, setCatering] = useState<GenericVendor[] | null>(null);
-  const [photographers, setPhotographers] = useState<GenericVendor[] | null>(null);
-  const [entertainment, setEntertainment] = useState<GenericVendor[] | null>(null);
-  const [decoration, setDecoration] = useState<GenericVendor[] | null>(null);
+  const event = useSelector((state: RootState) => state.selectedEvent.event);
+  const bookedVendors = useSelector((state: RootState) => state.selectedEvent.bookedVendors);
+  const venues = useSelector((state: RootState) => state.selectedEvent.venues);
+  const catering = useSelector((state: RootState) => state.selectedEvent.catering);
+  const photographers = useSelector((state: RootState) => state.selectedEvent.photographers);
+  const entertainment = useSelector((state: RootState) => state.selectedEvent.entertainment);
+  const decoration = useSelector((state: RootState) => state.selectedEvent.decoration);
 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -44,35 +43,34 @@ const EventDetails: React.FC = () => {
       if (error) {
         console.log("Error fetching details: ", error);
       } else if (data) {
-        setEvent(data);
+        dispatch(setEvent(data));
         setFormData(data);
       }
     };
 
     fetchEventDetails();
-  }, [id]);
+  }, [event, id]);
 
   useEffect(() => {
     const fetchBookedVendorDetails = async () => {
       if (event) {
         const booked = await readBookedVendorByEvent(event.id);
-        setBookedVendors(booked);
+        dispatch(setBookedVendors(booked));
         if (booked) {
           for (let i = 0, n = booked.length; i < n; i++) {
             let curr = await selectVendorByTypeAndID(booked[i].vendorType, booked[i].vendorID);
-            console.log("");
-            console.log(curr);
+
             if (curr && curr.length > 0) {
               if (curr[0].vendorType === "venues") {
-                setVenues(curr);
+                dispatch(setVenues(curr));
               } else if (curr[0].vendorType === "catering") {
-                setCatering(curr);
+                dispatch(setCatering(curr));
               } else if (curr[0].vendorType === "photographers") {
-                setPhotographers(curr);
+                dispatch(setPhotographers(curr));
               } else if (curr[0].vendorType === "entertainment") {
-                setEntertainment(curr);
+                dispatch(setEntertainment(curr));
               } else if (curr[0].vendorType === "decoration") {
-                setDecoration(curr);
+                dispatch(setDecoration(curr));
               }
             }
           }
@@ -138,8 +136,8 @@ const EventDetails: React.FC = () => {
         console.error("Error updating event:", error);
         Alert.alert("Error", "Failed to update the event.");
       } else if (data && data.length > 0) {
-        console.log("hi1");
-        setEvent(data[0]);
+
+        dispatch(setEvent(null));
         dispatch(setEvents(null)); // Sets events redux to null to force useEffect in eventList to rerender the events 
         setIsEditing(false);
         console.log("Event updated");
@@ -157,7 +155,6 @@ const EventDetails: React.FC = () => {
     }
   };
 
-
   const handleDeleteEvent = async () => {
     const deleteProceed = async () => {
       if (typeof id === "string") {
@@ -165,7 +162,6 @@ const EventDetails: React.FC = () => {
         await deleteEvent(id);
         dispatch(setEvents(null));
         setIsLoading(false);
-        // router.replace("/(tabs)/event/eventList");
         router.back();
       }
     }

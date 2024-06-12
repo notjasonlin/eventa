@@ -13,7 +13,7 @@ const initialState: EventsState = {
     pastEvents: null,
 }
 
-const eventSlice = createSlice({
+const eventsSlice = createSlice({
     name: "currentEvents",
     initialState,
     reducers: {
@@ -29,5 +29,5 @@ const eventSlice = createSlice({
     }
 });
 
-export const { setEvents, setUpcomingEvents, setPastEvents } = eventSlice.actions;
-export default eventSlice.reducer;
+export const { setEvents, setUpcomingEvents, setPastEvents } = eventsSlice.actions;
+export default eventsSlice.reducer;

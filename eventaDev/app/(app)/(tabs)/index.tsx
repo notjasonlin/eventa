@@ -3,7 +3,8 @@ import { Text, View } from "react-native";
 import StyleButton from "../../../components/Buttons/StyleButton";
 import { grabEmail } from "../../../functions/grabEmail";
 import { uploadFromImages } from "../../../functions/photos/uploadFromImages";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
 
 import ImageButton from "../../../components/Buttons/ImageButton";
 import { supabase } from "../../../lib/supabase";
@@ -12,15 +13,12 @@ import { supabase } from "../../../lib/supabase";
 export const HomePage = () => {
   let email = grabEmail();
 
-  // Isn't working properly
   const [uri, setUri] = useState<string | null>(null);
 
   const addImageButtonHandler = async () => {
     const newUri = await uploadFromImages();
     setUri(newUri);
   }
-  //
-
 
   return (
     <View style={{flexDirection: "column"}}>

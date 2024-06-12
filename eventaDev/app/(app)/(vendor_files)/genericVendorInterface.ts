@@ -3,5 +3,6 @@ export interface GenericVendor {
     name: string;
     mpid: number;
     verified: boolean;
+    vendorType: string;
   }
   

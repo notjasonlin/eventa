@@ -1,12 +1,94 @@
-import React from 'react';
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store/redux/store";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/redux/store";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Feather } from '@expo/vector-icons';
+import { bookVendor, selectBookedVendor } from '../../../functions/bookedVendorFunctions';
+import EventSelectModal from '../../../components/EventSelectModal';
+import { Event } from '../(event_files)/eventInterface';
+import { useRouter } from 'expo-router';
+import { fetchEvents } from '../../../functions/eventFunctions';
+import { setUpcomingEvents } from '../../../store/redux/events';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
+    const upcomingEvents = useSelector((state: RootState) => state.currentEvents.upcomingEvents);
+    const session = useSelector((state: RootState) => state.authentication.session);
+    const dispatch = useDispatch<AppDispatch>();
+    const router = useRouter();
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+
     const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/venues/default.png` };
+
+    useEffect(() => {
+        if (!upcomingEvents) {
+            if (session) {
+                fetchEvents(session.user.id)
+                    .then(({ upcomingEvents }) => {
+                        dispatch(setUpcomingEvents(upcomingEvents));
+                    })
+                    .catch(error => setFetchError(error.message));
+            } else {
+                console.error("Session is null!");
+            }
+        } else {
+            console.log("Upcoming Events rendered!");
+        }
+    }, [session, upcomingEvents]);
+
+
+    useEffect(() => {
+        if (showModal && (!upcomingEvents || upcomingEvents.length === 0)) {
+
+            if (upcomingEvents) console.log(upcomingEvents.length)
+
+            Alert.alert(
+                "No existing events",
+                "Want to create an event?",
+                [
+                    {
+                        text: "Create Event",
+                        onPress: () => router.push("(event_files)/eventForm"),
+                    },
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Operation canceled"),
+                        style: "cancel",
+                    },
+                ]
+            );
+            setShowModal(false);
+        }
+    }, [showModal, upcomingEvents]);
+
+
+    const handleBook = async (event: Event) => {
+        const book = async () => {
+            if (vendor?.id !== undefined) {
+                // console.log("ID " + event.id);
+                const booking = await selectBookedVendor(vendor.id, event.id, vendor.vendorType)
+                if (booking && booking.length > 0) {
+                    Alert.alert(`Already booked ${vendor?.name} for ${event.eventName}`)
+                } else {
+                    await bookVendor(vendor.id, event.id, vendor.vendorType);
+                    setShowModal(false);
+                }
+            }
+        }
+
+        Alert.alert(`Book ${vendor?.name} for ${event.eventName}?`, "", [
+            {
+                text: "Book",
+                onPress: book,
+            },
+            {
+                text: "Cancel",
+                onPress: () => console.log("Operation canceled"),
+                style: "cancel",
+            },
+        ])
+    }
 
     return (
         <View style={styles.container}>
@@ -21,7 +103,7 @@ const SingleVendor = () => {
             </View>
             <Image source={DEFAULT_IMAGE} style={styles.vendorImage} />
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.bookButton} onPress={() => console.log("Pressed")}>
+                <TouchableOpacity style={styles.bookButton} onPress={() => setShowModal(true)}>
                     <Text style={styles.bookButtonText}>Book now!</Text>
                 </TouchableOpacity>
             </View>
@@ -31,6 +113,9 @@ const SingleVendor = () => {
             </View>
             <Text style={styles.descriptionText}>Description</Text>
             <Text style={styles.policyText}>Policy</Text>
+            {showModal && upcomingEvents && upcomingEvents.length > 0 && (
+                <EventSelectModal select={handleBook} hideModal={() => setShowModal(false)} upcomingEvents={upcomingEvents} />)
+            }
         </View>
     );
 }

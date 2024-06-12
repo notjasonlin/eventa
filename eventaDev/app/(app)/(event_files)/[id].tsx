@@ -4,29 +4,30 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { deleteEvent } from "../../../functions/eventFunctions";
-import { UseDispatch, useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store/redux/store";
 import { setEvents } from "../../../store/redux/events";
-
-interface Event {
-  id: number;
-  created_at: string;
-  eventType: string;
-  eventName: string;
-  eventTime: string;
-  userId: string;
-  location: string;
-  eventDate: string;
-  description: string;
-}
+import { readBookedVendorByEvent } from "../../../functions/bookedVendorFunctions";
+import { Event } from "./eventInterface";
+import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions";
+import BookedVendorCard from "../../../components/BookedVendorCard";
+import { setEvent, setBookedVendors, setVenues, setCatering, 
+  setPhotographers, setEntertainment, setDecoration} from "../../../store/redux/event";
 
 const EventDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
-  const [event, setEvent] = useState<Event | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Event | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const event = useSelector((state: RootState) => state.selectedEvent.event);
+  const bookedVendors = useSelector((state: RootState) => state.selectedEvent.bookedVendors);
+  const venues = useSelector((state: RootState) => state.selectedEvent.venues);
+  const catering = useSelector((state: RootState) => state.selectedEvent.catering);
+  const photographers = useSelector((state: RootState) => state.selectedEvent.photographers);
+  const entertainment = useSelector((state: RootState) => state.selectedEvent.entertainment);
+  const decoration = useSelector((state: RootState) => state.selectedEvent.decoration);
+
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<AppDispatch>();
@@ -42,15 +43,45 @@ const EventDetails: React.FC = () => {
       if (error) {
         console.log("Error fetching details: ", error);
       } else if (data) {
-        setEvent(data);
+        dispatch(setEvent(data));
         setFormData(data);
       }
     };
 
     fetchEventDetails();
-  }, [id]);
+  }, [event, id]);
 
-  if (!event) {
+  useEffect(() => {
+    const fetchBookedVendorDetails = async () => {
+      if (event) {
+        const booked = await readBookedVendorByEvent(event.id);
+        dispatch(setBookedVendors(booked));
+        if (booked) {
+          for (let i = 0, n = booked.length; i < n; i++) {
+            let curr = await selectVendorByTypeAndID(booked[i].vendorType, booked[i].vendorID);
+
+            if (curr && curr.length > 0) {
+              if (curr[0].vendorType === "venues") {
+                dispatch(setVenues(curr));
+              } else if (curr[0].vendorType === "catering") {
+                dispatch(setCatering(curr));
+              } else if (curr[0].vendorType === "photographers") {
+                dispatch(setPhotographers(curr));
+              } else if (curr[0].vendorType === "entertainment") {
+                dispatch(setEntertainment(curr));
+              } else if (curr[0].vendorType === "decoration") {
+                dispatch(setDecoration(curr));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    fetchBookedVendorDetails();
+  }, [event])
+
+  if (!event && (!bookedVendors || bookedVendors.length === 0)) {
     return (
       <View>
         <Text>Loading...</Text>
@@ -59,71 +90,70 @@ const EventDetails: React.FC = () => {
   }
 
   const handleUpdateEvent = async () => {
-  if (formData) {
-    console.log("Form data:", formData);
-    console.log("Event ID:", id);
+    if (formData) {
+      console.log("Form data:", formData);
+      console.log("Event ID:", id);
 
-    // Check if the record exists
-    const { data: existingData, error: fetchError } = await supabase
-      .from("events")
-      .select("*")
-      .eq("id", id)
-      .single();
+      // Check if the record exists
+      const { data: existingData, error: fetchError } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (fetchError) {
-      console.error("Error fetching event:", fetchError);
-      Alert.alert("Error", "Failed to fetch the event details.");
-      return;
+      if (fetchError) {
+        console.error("Error fetching event:", fetchError);
+        Alert.alert("Error", "Failed to fetch the event details.");
+        return;
+      }
+
+      if (!existingData) {
+        console.error("Event not found with ID:", id);
+        Alert.alert("Error", "Event not found.");
+        return;
+      }
+
+      console.log("Existing event data:", existingData);
+
+      // Proceed with the update if the record exists
+      const { data, error } = await supabase
+        .from("events")
+        .update({
+          eventType: formData.eventType,
+          eventName: formData.eventName,
+          eventDate: formData.eventDate,
+          eventTime: formData.eventTime,
+          location: formData.location,
+          description: formData.description,
+        })
+        .eq("id", id)
+        .select(); // Make sure to select the updated record
+
+      console.log("Update response data:", data);
+      console.log("Update response error:", error);
+
+      if (error) {
+        console.error("Error updating event:", error);
+        Alert.alert("Error", "Failed to update the event.");
+      } else if (data && data.length > 0) {
+
+        dispatch(setEvent(null));
+        dispatch(setEvents(null)); // Sets events redux to null to force useEffect in eventList to rerender the events 
+        setIsEditing(false);
+        console.log("Event updated");
+        Alert.alert("Event Updated", "The event has been updated successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.back(), // router.replace("/(tabs)/event/eventList")
+          },
+        ]);
+        console.log("After event");
+      } else {
+        console.log("No data returned from update or data is empty");
+        Alert.alert("Error", "No data returned from update.");
+      }
     }
-
-    if (!existingData) {
-      console.error("Event not found with ID:", id);
-      Alert.alert("Error", "Event not found.");
-      return;
-    }
-
-    console.log("Existing event data:", existingData);
-
-    // Proceed with the update if the record exists
-    const { data, error } = await supabase
-      .from("events")
-      .update({
-        eventType: formData.eventType,
-        eventName: formData.eventName,
-        eventDate: formData.eventDate,
-        eventTime: formData.eventTime,
-        location: formData.location,
-        description: formData.description,
-      })
-      .eq("id", id)
-      .select(); // Make sure to select the updated record
-
-    console.log("Update response data:", data);
-    console.log("Update response error:", error);
-
-    if (error) {
-      console.error("Error updating event:", error);
-      Alert.alert("Error", "Failed to update the event.");
-    } else if (data && data.length > 0) {
-      console.log("hi1");
-      setEvent(data[0]);
-      dispatch(setEvents(null)); // Sets events redux to null to force useEffect in eventList to rerender the events 
-      setIsEditing(false);
-      console.log("Event updated");
-      Alert.alert("Event Updated", "The event has been updated successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(), // router.replace("/(tabs)/event/eventList")
-        },
-      ]);
-      console.log("After event");
-    } else {
-      console.log("No data returned from update or data is empty");
-      Alert.alert("Error", "No data returned from update.");
-    }
-  }
-};
-
+  };
 
   const handleDeleteEvent = async () => {
     const deleteProceed = async () => {
@@ -132,7 +162,6 @@ const EventDetails: React.FC = () => {
         await deleteEvent(id);
         dispatch(setEvents(null));
         setIsLoading(false);
-        // router.replace("/(tabs)/event/eventList");
         router.back();
       }
     }
@@ -226,23 +255,33 @@ const EventDetails: React.FC = () => {
           </TouchableOpacity>
         </>
       ) : (
-        <>
-          <Text style={styles.title}>{event.eventName}</Text>
-          <Text style={styles.details}>Date: {event.eventDate}</Text>
-          <Text style={styles.details}>Time: {event.eventTime}</Text>
-          <Text style={styles.details}>Location: {event.location}</Text>
-          <Text style={styles.details}>Description: {event.description}</Text>
-          <TouchableOpacity style={styles.button} onPress={() => setIsEditing(true)}>
-            <Text style={styles.buttonText}>Edit Event</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={handleDeleteEvent}>
-            <Text style={styles.buttonText}>Delete Event</Text>
-          </TouchableOpacity>
-          <ActivityIndicator size="large" animating={isLoading}/>
-        </>
+        event && (
+          <>
+            <Text style={styles.title}>{event.eventName}</Text>
+            <Text style={styles.details}>Date: {event.eventDate}</Text>
+            <Text style={styles.details}>Time: {event.eventTime}</Text>
+            <Text style={styles.details}>Location: {event.location}</Text>
+            <Text style={styles.details}>Description: {event.description}</Text>
+            <Text style={styles.details}>Booked: </Text>
+            <BookedVendorCard vendors={venues} />
+            <BookedVendorCard vendors={catering} />
+            <BookedVendorCard vendors={photographers} />
+            <BookedVendorCard vendors={entertainment} />
+            <BookedVendorCard vendors={decoration} />
+
+            <TouchableOpacity style={styles.button} onPress={() => setIsEditing(true)}>
+              <Text style={styles.buttonText}>Edit Event</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.button, styles.deleteButton]} onPress={handleDeleteEvent}>
+              <Text style={styles.buttonText}>Delete Event</Text>
+            </TouchableOpacity>
+            <ActivityIndicator size="large" animating={isLoading} />
+          </>
+        )
       )}
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({

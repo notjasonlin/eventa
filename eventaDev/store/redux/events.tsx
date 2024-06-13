@@ -5,12 +5,14 @@ interface EventsState {
     events: Event[] | null;
     upcomingEvents: Event[] | null;
     pastEvents: Event[] | null;
+    selectedEvent: Event | null;
 }
 
 const initialState: EventsState = {
     events: null,
     upcomingEvents: null,
     pastEvents: null,
+    selectedEvent: null,
 }
 
 const eventsSlice = createSlice({
@@ -26,8 +28,11 @@ const eventsSlice = createSlice({
         setPastEvents(state, action: PayloadAction<Event[] | null>) {
             state.pastEvents = action.payload;
         },
+        setSelectedEvent(state, action: PayloadAction<Event | null>) {
+            state.selectedEvent = action.payload;
+        },
     }
 });
 
-export const { setEvents, setUpcomingEvents, setPastEvents } = eventsSlice.actions;
+export const { setEvents, setUpcomingEvents, setPastEvents, setSelectedEvent } = eventsSlice.actions;
 export default eventsSlice.reducer;

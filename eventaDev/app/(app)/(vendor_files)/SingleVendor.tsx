@@ -4,7 +4,7 @@ import { RootState, AppDispatch } from "../../../store/redux/store";
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Feather } from '@expo/vector-icons';
 import { bookVendor, selectBookedVendor } from '../../../functions/bookedVendorFunctions';
-import EventSelectModal from '../../../components/EventSelectModal';
+import EventSelectModal from '../../../components/event/EventSelectModal';
 import { Event } from '../(event_files)/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions';

@@ -26,7 +26,7 @@ export const selectBookedVendor = async (vendorID: string, eventID: string, vend
         console.error("Error booking vendor: " + error);
     }
 
-    console.log(data);
+    // console.log(data);
 
     return data;
 }

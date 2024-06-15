@@ -11,22 +11,26 @@ import { readBookedVendorByEvent } from "../../../functions/bookedVendorFunction
 import { Event } from "./eventInterface";
 import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions";
 import BookedVendorCard from "../../../components/BookedVendorCard";
-import { setEvent, setBookedVendors, setVenues, setCatering, 
-  setPhotographers, setEntertainment, setDecoration} from "../../../store/redux/event";
+import { GenericVendor } from "../(vendor_files)/genericVendorInterface";
+import { BookedVendor } from "../(vendor_files)/bookedVendorInterface";
+
+// Use for when selecting event from individual vendor page
+// import { setEvent, setBookedVendors, setVenues, setCatering, 
+  // setPhotographers, setEntertainment, setDecoration} from "../../../store/redux/event";
 
 const EventDetails: React.FC = () => {
   const { id } = useLocalSearchParams();
   const [isEditing, setIsEditing] = useState(false);
+  // formData === event data
   const [formData, setFormData] = useState<Event | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const event = useSelector((state: RootState) => state.selectedEvent.event);
-  const bookedVendors = useSelector((state: RootState) => state.selectedEvent.bookedVendors);
-  const venues = useSelector((state: RootState) => state.selectedEvent.venues);
-  const catering = useSelector((state: RootState) => state.selectedEvent.catering);
-  const photographers = useSelector((state: RootState) => state.selectedEvent.photographers);
-  const entertainment = useSelector((state: RootState) => state.selectedEvent.entertainment);
-  const decoration = useSelector((state: RootState) => state.selectedEvent.decoration);
+  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+  const [formBookedVendors, setFormBookedVendors] = useState<BookedVendor[] | null>(null);
+  const [formVenues, setFormVenues] = useState<GenericVendor[] | null>(null);
+  const [formCatering, setFormCatering] = useState<GenericVendor[] | null>(null);
+  const [formPhotographers, setFormPhotographers] = useState<GenericVendor[] | null>(null);
+  const [formEntertainment, setFormEntertainment] = useState<GenericVendor[] | null>(null);
+  const [formDecoration, setFormDecoration] = useState<GenericVendor[] | null>(null);
 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -43,34 +47,33 @@ const EventDetails: React.FC = () => {
       if (error) {
         console.log("Error fetching details: ", error);
       } else if (data) {
-        dispatch(setEvent(data));
         setFormData(data);
       }
     };
 
     fetchEventDetails();
-  }, [event, id]);
+  }, [formData, id]);
 
   useEffect(() => {
     const fetchBookedVendorDetails = async () => {
-      if (event) {
-        const booked = await readBookedVendorByEvent(event.id);
-        dispatch(setBookedVendors(booked));
+      if (formData) {
+        const booked = await readBookedVendorByEvent(formData.id);
+        setFormBookedVendors(booked);
         if (booked) {
           for (let i = 0, n = booked.length; i < n; i++) {
             let curr = await selectVendorByTypeAndID(booked[i].vendorType, booked[i].vendorID);
 
             if (curr && curr.length > 0) {
               if (curr[0].vendorType === "venues") {
-                dispatch(setVenues(curr));
+                setFormVenues(curr);
               } else if (curr[0].vendorType === "catering") {
-                dispatch(setCatering(curr));
+                setFormCatering(curr);
               } else if (curr[0].vendorType === "photographers") {
-                dispatch(setPhotographers(curr));
+                setFormPhotographers(curr);
               } else if (curr[0].vendorType === "entertainment") {
-                dispatch(setEntertainment(curr));
+                setFormEntertainment(curr);
               } else if (curr[0].vendorType === "decoration") {
-                dispatch(setDecoration(curr));
+                setFormDecoration(curr);
               }
             }
           }
@@ -79,9 +82,9 @@ const EventDetails: React.FC = () => {
     }
 
     fetchBookedVendorDetails();
-  }, [event])
+  }, [formData])
 
-  if (!event && (!bookedVendors || bookedVendors.length === 0)) {
+  if (!formData && (!formBookedVendors || formBookedVendors.length === 0)) {
     return (
       <View>
         <Text>Loading...</Text>
@@ -137,7 +140,7 @@ const EventDetails: React.FC = () => {
         Alert.alert("Error", "Failed to update the event.");
       } else if (data && data.length > 0) {
 
-        dispatch(setEvent(null));
+        setFormData(null);
         dispatch(setEvents(null)); // Sets events redux to null to force useEffect in eventList to rerender the events 
         setIsEditing(false);
         console.log("Event updated");
@@ -255,19 +258,19 @@ const EventDetails: React.FC = () => {
           </TouchableOpacity>
         </>
       ) : (
-        event && (
+        formData && (
           <>
-            <Text style={styles.title}>{event.eventName}</Text>
-            <Text style={styles.details}>Date: {event.eventDate}</Text>
-            <Text style={styles.details}>Time: {event.eventTime}</Text>
-            <Text style={styles.details}>Location: {event.location}</Text>
-            <Text style={styles.details}>Description: {event.description}</Text>
+            <Text style={styles.title}>{formData.eventName}</Text>
+            <Text style={styles.details}>Date: {formData.eventDate}</Text>
+            <Text style={styles.details}>Time: {formData.eventTime}</Text>
+            <Text style={styles.details}>Location: {formData.location}</Text>
+            <Text style={styles.details}>Description: {formData.description}</Text>
             <Text style={styles.details}>Booked: </Text>
-            <BookedVendorCard vendors={venues} />
-            <BookedVendorCard vendors={catering} />
-            <BookedVendorCard vendors={photographers} />
-            <BookedVendorCard vendors={entertainment} />
-            <BookedVendorCard vendors={decoration} />
+            <BookedVendorCard vendors={formVenues} />
+            <BookedVendorCard vendors={formCatering} />
+            <BookedVendorCard vendors={formPhotographers} />
+            <BookedVendorCard vendors={formEntertainment} />
+            <BookedVendorCard vendors={formDecoration} />
 
             <TouchableOpacity style={styles.button} onPress={() => setIsEditing(true)}>
               <Text style={styles.buttonText}>Edit Event</Text>

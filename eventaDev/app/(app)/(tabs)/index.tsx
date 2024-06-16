@@ -6,11 +6,15 @@ import { grabEmail } from "../../../functions/grabEmail";
 import { uploadFromImages } from "../../../functions/photos/uploadFromImages";
 import ImageButton from "../../../components/Buttons/ImageButton";
 import { supabase } from "../../../lib/supabase";
-import EventSelector from "../../../components/EventSelector";
+import EventSelector from "../../../components/event/EventSelector";
+import EventDisplay from "../../../components/event/EventDisplay";
+import { RootState } from "../../../store/redux/store";
+import { useSelector } from "react-redux";
 
 export const HomePage = () => {
   let email = grabEmail();
   const [uri, setUri] = useState<string | null>(null);
+  const event = useSelector((state: RootState) => state.selectedEvent.event);
 
   const addImageButtonHandler = async () => {
     const newUri = await uploadFromImages();
@@ -24,6 +28,9 @@ export const HomePage = () => {
       <StyleButton onPress={addImageButtonHandler}>Add image!</StyleButton>
       {/* <ImageButton uri={uri} /> */}
       <EventSelector />
+
+      {event && <EventDisplay />}
+
       {/* <Link href="/users/1">Go to user 1</Link>
       <Link href="/users/2">Go to user 2</Link>
       <Link href="/vendors/fetchVendor">Go to Marketplace</Link>

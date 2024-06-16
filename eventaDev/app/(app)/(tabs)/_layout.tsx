@@ -60,7 +60,7 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="vendors/vendorTypes"
+        name="vendors/marketplace"
         options={{
           headerTitle: "Vendor Marketplace", // Change into vendor name in the future
           title: "Vendor",

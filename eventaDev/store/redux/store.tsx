@@ -3,6 +3,7 @@ import authReducer from "./auth";
 import vendorReducer from "./vendor";
 import eventsReducer from "./events";
 import eventReducer from "./event";
+import marketplaceReducer from "./marketplace";
 
 export const store = configureStore({
     reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
         currentVendor: vendorReducer,
         currentEvents: eventsReducer,
         selectedEvent: eventReducer,
+        vendorMarketplace: marketplaceReducer,
     }
 });
 

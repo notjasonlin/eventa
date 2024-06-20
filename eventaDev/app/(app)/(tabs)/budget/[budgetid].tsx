@@ -13,15 +13,19 @@ const UserPage = () => {
   const [costs, setCosts] = useState<Cost[] | null>(null);
 
   useEffect(() => {
-    const fetchBudget = async () => {
-      if (event) {
-        setBudgetData(await readBudget(event.id));
-      } else {
-        console.error("No selected event");
-      }
+    console.log(event?.id);
+    setBudgetData(null);
+    setCosts(null);
+
+    if (event?.id) {
+      const fetchBudget = async () => {
+        const budget = await readBudget(event.id);
+        setBudgetData(budget);
+      };
+
+      fetchBudget();
     }
-    fetchBudget();
-  }, [event])
+  }, [event, event?.id]);
 
   useEffect(() => {
     const fetchCosts = async () => {
@@ -41,16 +45,25 @@ const UserPage = () => {
         flexible: false,
         maxFlex: 10,
       });
-      setBudgetData(await readBudget(event.id));
+      const data = await readBudget(event.id)
+      await setDefaultCosts(data);
+      setBudgetData(data);
     } else {
       console.error("No selected event");
     }
   }
 
+  const setDefaultCosts = async (data: Budget | null) => {
+    await addCost({ budgetID: data?.id, vendorType: "Venue" });
+    await addCost({ budgetID: data?.id, vendorType: "Catering" });
+    await addCost({ budgetID: data?.id, vendorType: "Photographers" });
+    await addCost({ budgetID: data?.id, vendorType: "Entertainment" });
+    await addCost({ budgetID: data?.id, vendorType: "Decoration" });
+  }
+
   const createCosts = async () => {
     if (budgetData) {
       await addCost({
-        id: Math.floor(Math.random() * 100),
         budgetID: budgetData.id,
         vendorType: "Vendor",
         costInDollar: 100,
@@ -66,45 +79,48 @@ const UserPage = () => {
 
   const changeCosts = async () => {
     if (budgetData && costs) {
-      await updateCost(budgetData.id, costs[0].id, { "priority": 2 });
-      setCosts(null); 
+      await updateCost(budgetData.id, costs[0].id, { "vendorType": "Venue" });
+      setCosts(null);
     }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Budget</Text>
-      <TouchableOpacity style={styles.button} onPress={setBudget}>
-        <Text style={styles.buttonText}>Set budget!</Text>
-      </TouchableOpacity>
-      {budgetData && (
-        <View style={styles.budgetContainer}>
-          <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
-          <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
-        </View>
+      {!budgetData && (
+        <TouchableOpacity style={styles.button} onPress={setBudget}>
+          <Text style={styles.buttonText}>Set budget!</Text>
+        </TouchableOpacity>
       )}
-      <TouchableOpacity style={styles.button} onPress={createCosts}>
-        <Text style={styles.buttonText}>Create a cost</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={changeCosts}>
-        <Text style={styles.buttonText}>Update a cost</Text>
-      </TouchableOpacity>
-
-      {costs && (
-        <View style={styles.costsContainer}>
-          <FlatList
-            data={costs}
-            renderItem={({ item }) => (
-              <View style={styles.costItem}>
-                <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
-                <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
-                <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
-              </View>
-            )}
-            keyExtractor={item => item.id.toString()}
-            contentContainerStyle={styles.flatListContent}
-          />
-        </View>
+      {budgetData && (
+        <>
+          <View style={styles.budgetContainer}>
+            <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
+            <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={createCosts}>
+            <Text style={styles.buttonText}>Create a cost</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={changeCosts}>
+            <Text style={styles.buttonText}>Update a cost</Text>
+          </TouchableOpacity>
+          {costs && (
+            <View style={styles.costsContainer}>
+              <FlatList
+                data={costs}
+                renderItem={({ item }) => (
+                  <View style={styles.costItem}>
+                    <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
+                    <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
+                    <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
+                  </View>
+                )}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={styles.flatListContent}
+              />
+            </View>
+          )}
+        </>
       )}
     </View>
   );
@@ -148,7 +164,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   flatListContent: {
-    paddingBottom: 20, 
+    paddingBottom: 20,
   },
   costItem: {
     padding: 10,

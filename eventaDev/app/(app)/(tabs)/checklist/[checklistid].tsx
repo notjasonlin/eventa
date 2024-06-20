@@ -1,12 +1,14 @@
+import { useEffect, useState } from "react";
+import { Text, TouchableOpacity, View, StyleSheet, FlatList } from "react-native";
+import { UseSelector } from "react-redux";
+import { RootState } from "../../../../store/redux/store";
 import { useLocalSearchParams } from "expo-router";
-import { Text, View } from "react-native";
 
 const UserPage = () => {
-  const { checklistid } = useLocalSearchParams<{checklistid: string}>();
 
   return (
     <View>
-      <Text>Checklist - {checklistid}</Text>
+      <Text>Checklist</Text>
     </View>
   );
 };

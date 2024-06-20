@@ -1,6 +1,6 @@
-import { supabase } from '../lib/supabase';
-import { Vendor } from '../app/(app)/(vendor_files)/vendorInterface';
-import { GenericVendor } from '../app/(app)/(vendor_files)/genericVendorInterface';
+import { supabase } from '../../lib/supabase';
+import { Vendor } from '../../app/(app)/(vendor_files)/vendorInterface';
+import { GenericVendor } from '../../app/(app)/(vendor_files)/genericVendorInterface';
 
 export const fetchVendors = async (): Promise<{ vendors: Vendor[], error: string | null }> => {
   const { data: vendors, error } = await supabase

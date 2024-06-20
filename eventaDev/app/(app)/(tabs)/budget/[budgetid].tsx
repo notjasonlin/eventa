@@ -3,9 +3,9 @@ import { Text, TouchableOpacity, View, StyleSheet, FlatList } from "react-native
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store/redux/store";
 import { Budget } from "../../../../interfaces/budgetInterface";
-import { readBudget, createBudget } from "../../../../functions/budgetFunctions";
+import { readBudget, createBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
 import { Cost } from "../../../../interfaces/costInterface";
-import { addCost, readCosts, updateCost } from "../../../../functions/costFunctions";
+import { addCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
 
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);

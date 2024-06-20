@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
 import StyleButton from "../../../components/Buttons/StyleButton";
-import { grabEmail } from "../../../functions/grabEmail";
+import { grabName } from "../../../functions/homeFunctions/grabName";
 import { uploadFromImages } from "../../../functions/photos/uploadFromImages";
 import ImageButton from "../../../components/Buttons/ImageButton";
 import { supabase } from "../../../lib/supabase";
@@ -12,7 +12,7 @@ import { RootState } from "../../../store/redux/store";
 import { useSelector } from "react-redux";
 
 export const HomePage = () => {
-  let email = grabEmail();
+  let name = grabName();
   const [uri, setUri] = useState<string | null>(null);
   const event = useSelector((state: RootState) => state.selectedEvent.event);
 
@@ -24,7 +24,7 @@ export const HomePage = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Home Page</Text>
-      <Text style={styles.email}>{email}</Text>
+      <Text style={styles.email}>Welcome back, {name}!</Text>
       <StyleButton onPress={addImageButtonHandler}>Add image!</StyleButton>
       {/* <ImageButton uri={uri} /> */}
       <EventSelector />

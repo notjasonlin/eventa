@@ -1,4 +1,4 @@
-import { Budget } from "../app/(app)/(budget_files)/budgetInterface";
+import { Budget } from "../interfaces/budgetInterface";
 import { supabase } from "../lib/supabase"
 
 export const readBudget = async (eventId: string): Promise<Budget | null> => {

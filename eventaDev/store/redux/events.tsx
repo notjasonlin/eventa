@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Event } from "../../app/(app)/(event_files)/eventInterface";
+import { Event } from "../../interfaces/eventInterface";
 
 interface EventsState {
     events: Event[] | null;

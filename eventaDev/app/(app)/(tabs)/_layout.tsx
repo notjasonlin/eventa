@@ -5,7 +5,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Octicons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
-import EventSelector from "../../../components/event/EventSelector";
 
 const renderHeaderRight = () => (
   <View style={{ flexDirection: "row", marginLeft: 10 }}>
@@ -28,7 +27,6 @@ const TabsLayout = () => {
         options={{
           title: "Home",
           headerRight: renderHeaderRight,
-          headerLeft: () => <EventSelector />,
           tabBarIcon: () => <AntDesign name="home" size={23} color="black" />
         }}
       />
@@ -60,7 +58,7 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="vendors/marketplace"
+        name="vendors/vendorTypes"
         options={{
           headerTitle: "Vendor Marketplace", // Change into vendor name in the future
           title: "Vendor",

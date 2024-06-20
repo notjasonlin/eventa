@@ -13,7 +13,6 @@ const VendorBar = ({ vendor, type }: { vendor: GenericVendor, type: string }) =>
     const dispatch = useDispatch<AppDispatch>();
     let vendorRedux = useSelector((state: RootState) => state.currentVendor.vendor);
 
-
     const handleSelectVendor = () => {
         console.log("Vendor: " + vendorRedux);
         dispatch(setVendor(vendor));

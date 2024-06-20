@@ -1,14 +1,20 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from 'expo-router';
-import { Event } from "../../app/(app)/(event_files)/eventInterface";
+
+interface Event {
+  id: number;
+  eventName: string;
+  eventDate: string;
+  eventTime: string;
+  location: string;
+}
 
 interface EventCardProps {
   event: Event;
-  onPress?: (...args: any[]) => void;
 }
 
-const EventCard = ({ event, onPress }: EventCardProps) => {
+const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const router = useRouter();
 
   const handlePress = () => {
@@ -16,7 +22,7 @@ const EventCard = ({ event, onPress }: EventCardProps) => {
   };
 
   return (
-    <TouchableOpacity onPress={onPress ? onPress : handlePress}>
+    <TouchableOpacity onPress={handlePress}>
       <View style={styles.container}>
         <Text style={styles.title}>{event.eventName}</Text>
         <Text style={styles.details}>Date: {event.eventDate}</Text>

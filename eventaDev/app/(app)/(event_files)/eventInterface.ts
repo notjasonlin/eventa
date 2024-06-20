@@ -1,13 +1,8 @@
 export interface Event {
-    id: string;
-    created_at: string;
+    id: number;
     eventName: string;
     eventDate: string;
     eventTime: string;
-    eventType: string;
-    userId: string;
     location: string;
-    description: string;
   }
-
   

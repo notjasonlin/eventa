@@ -1,10 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Event } from '../app/(app)/(event_files)/eventInterface';
 
-
-// const dispatch = useDispatch<AppDispatch>()
-
-export const fetchEvents = async (userId: string): Promise<{ events: Event[], pastEvents: Event[]; upcomingEvents: Event[] }> => {
+export const fetchEvents = async (userId: string): Promise<{ pastEvents: Event[]; upcomingEvents: Event[] }> => {
   const { data: events, error } = await supabase
     .from("events")
     .select("*")
@@ -15,14 +12,12 @@ export const fetchEvents = async (userId: string): Promise<{ events: Event[], pa
     throw error;
   }
 
-  // dispatch(setEvents(events));
-
   const today = new Date().toISOString().split('T')[0];
 
   const pastEvents = events.filter((event: Event) => event.eventDate < today);
   const upcomingEvents = events.filter((event: Event) => event.eventDate >= today);
 
-  return { events, pastEvents, upcomingEvents };
+  return { pastEvents, upcomingEvents };
 };
 
 export const deleteEvent = async (id: string) => {

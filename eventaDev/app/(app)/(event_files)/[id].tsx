@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/redux/store";
 import { setEvents } from "../../../store/redux/events";
 import { readBookedVendorByEvent } from "../../../functions/bookedVendorFunctions";
-import { Event } from "./eventInterface";
+import { Event } from "../../../interfaces/eventInterface";
 import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions";
 import BookedVendorCard from "../../../components/BookedVendorCard";
 import { GenericVendor } from "../(vendor_files)/genericVendorInterface";

@@ -1,5 +1,5 @@
 import { Modal, Pressable, View, Text, StyleSheet, ScrollView } from "react-native";
-import { Event } from "../../app/(app)/(event_files)/eventInterface";
+import { Event } from "../../interfaces/eventInterface";
 import EventCard from "./EventCard";
 
 type EventSelectorModalProps = {

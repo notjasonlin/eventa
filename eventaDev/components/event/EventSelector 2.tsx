@@ -4,7 +4,7 @@ import { RootState, AppDispatch } from '../../store/redux/store';
 import { setSelectedEvent, setEvents } from '../../store/redux/events';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, Modal } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { Event } from '../../app/(app)/(event_files)/eventInterface';
+import { Event } from '../../interfaces/eventInterface';
 import { supabase } from '../../lib/supabase';
 import { setEvent } from '../../store/redux/event';
 

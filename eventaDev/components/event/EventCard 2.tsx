@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from 'expo-router';
-import { Event } from "../../app/(app)/(event_files)/eventInterface";
+import { Event } from "../../interfaces/eventInterface";
 
 interface EventCardProps {
   event: Event;

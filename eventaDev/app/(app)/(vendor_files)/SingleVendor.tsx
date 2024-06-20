@@ -5,7 +5,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-na
 import { Feather } from '@expo/vector-icons';
 import { bookVendor, selectBookedVendor } from '../../../functions/bookedVendorFunctions';
 import EventSelectModal from '../../../components/event/EventSelectModal';
-import { Event } from '../(event_files)/eventInterface';
+import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';

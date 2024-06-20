@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabase";
-import { Cost } from "../app/(app)/(budget_files)/costInterface";
+import { Cost } from "../interfaces/costInterface";
 
 export const readCosts = async (budgetID: number): Promise<Cost[] | null> => {
     let { data: costs, error } = await supabase

@@ -68,3 +68,14 @@ export const updateCost = async (budgetID: number, costID: number, column: Recor
         console.error(error);
     }
 }
+
+export const deleteCost = async (costID: number) => {
+    const { error } = await supabase
+        .from('costs')
+        .delete()
+        .eq('id', costID)
+
+    if (error) {
+        console.error(error);
+    }
+}

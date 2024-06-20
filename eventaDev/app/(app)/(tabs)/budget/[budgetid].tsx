@@ -5,7 +5,7 @@ import { RootState } from "../../../../store/redux/store";
 import { Budget } from "../../(budget_files)/budgetInterface";
 import { readBudget, createBudget } from "../../../../functions/budgetFunctions";
 import { Cost } from "../../(budget_files)/costInterface";
-import { addCost, readCosts, updateCost } from "../../../../functions/costFunctions";
+import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/costFunctions";
 
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
@@ -84,6 +84,13 @@ const UserPage = () => {
     }
   }
 
+  const removeCost = async (costID: number) => {
+    if (budgetData && costs) {
+      await deleteCost(costID);
+      setCosts(null);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Budget</Text>
@@ -113,6 +120,9 @@ const UserPage = () => {
                     <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
                     <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
                     <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
+                    <TouchableOpacity onPress={() => removeCost(item.id)}>
+                      <Text>DELETE</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
                 keyExtractor={item => item.id.toString()}

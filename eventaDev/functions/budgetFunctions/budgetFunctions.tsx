@@ -1,5 +1,5 @@
 import { Budget } from "../../interfaces/budgetInterface";
-import { supabase } from "../../lib/supabase"
+import { supabase } from "../../lib/supabase";
 
 export const readBudget = async (eventID: string): Promise<Budget | null> => {
     let { data: budget, error } = await supabase

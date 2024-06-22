@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/redux/store";
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { Feather } from '@expo/vector-icons';
-import { bookVendor, selectBookedVendor } from '../../../functions/bookedVendorFunctions';
+import { bookVendor, selectBookedVendor } from '../../../functions/vendorFunctions/bookedVendorFunctions';
 import EventSelectModal from '../../../components/event/EventSelectModal';
 import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
-import { fetchEvents } from '../../../functions/eventFunctions';
+import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
 
 const SingleVendor = () => {

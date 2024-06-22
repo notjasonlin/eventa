@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabase';
-import { Event } from '../interfaces/eventInterface';
+import { supabase } from '../../lib/supabase';
+import { Event } from '../../interfaces/eventInterface';
 
 
 // const dispatch = useDispatch<AppDispatch>()

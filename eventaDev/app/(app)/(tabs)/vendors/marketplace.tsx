@@ -8,7 +8,7 @@ import { setMarketplace } from "../../../../store/redux/marketplace";
 // Component imports
 import VendorCard from "../../../../components/vendor/vendorCard";
 import VendorModal from "../../../../components/vendor/vendorModal";
-import { fetchVendors, addNewItem } from "../../../../functions/vendorFunctions";
+import { fetchVendors, addNewItem } from "../../../../functions/vendorFunctions/vendorFunctions";
 
 const Marketplace = () => {
   const [fetchError, setFetchError] = useState<String | null>(null);

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 export const bookVendor = async (vendorID: string, eventID: string, vendorType: string) => {
 

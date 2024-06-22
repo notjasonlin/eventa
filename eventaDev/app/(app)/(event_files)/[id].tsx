@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity, ActivityInd
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import { deleteEvent } from "../../../functions/eventFunctions";
+import { deleteEvent } from "../../../functions/eventFunctions/eventFunctions";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/redux/store";
 import { setEvents } from "../../../store/redux/events";
-import { readBookedVendorByEvent } from "../../../functions/bookedVendorFunctions";
+import { readBookedVendorByEvent } from "../../../functions/vendorFunctions/bookedVendorFunctions";
 import { Event } from "../../../interfaces/eventInterface";
-import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions";
+import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions/vendorFunctions";
 import BookedVendorCard from "../../../components/BookedVendorCard";
 import { GenericVendor } from "../(vendor_files)/genericVendorInterface";
 import { BookedVendor } from "../(vendor_files)/bookedVendorInterface";

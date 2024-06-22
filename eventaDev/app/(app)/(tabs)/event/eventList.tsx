@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import EventCard from '../../../../components/event/EventCard';
-import { fetchEvents } from '../../../../functions/eventFunctions';
+import { fetchEvents } from '../../../../functions/eventFunctions/eventFunctions';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from '../../../../store/redux/store';
 import { setEvents, setUpcomingEvents, setPastEvents } from '../../../../store/redux/events';

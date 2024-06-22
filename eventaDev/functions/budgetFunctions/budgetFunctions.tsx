@@ -1,11 +1,10 @@
-import { Budget } from "../interfaces/budgetInterface";
-import { supabase } from "../lib/supabase"
+import { Budget } from "../../interfaces/budgetInterface";
+import { supabase } from "../../lib/supabase";
 
-export const readBudget = async (eventId: string): Promise<Budget | null> => {
+export const readBudget = async (eventID: string): Promise<Budget | null> => {
     let { data: budget, error } = await supabase
         .from('budget')
         .select('*')
-        .eq("eventId", eventId)
 
     if (error) {
         console.error(error);
@@ -25,6 +24,6 @@ export const createBudget = async (budgetData: Budget) => {
     if (error) {
         console.error(error);
     } else {
-        // console.log("Budget created");
+        console.log("Budget created succesfully");
     }
 }

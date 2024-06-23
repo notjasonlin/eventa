@@ -1,4 +1,5 @@
 import { Checklist } from "../../interfaces/checklistInterface";
+import { Task } from "../../interfaces/taskInterface";
 import { supabase } from "../../lib/supabase";
 
 export const readChecklist = async (eventID: string): Promise<Checklist | null> => {
@@ -26,4 +27,8 @@ export const createChecklist = async (checklistData: Checklist) => {
     } else {
         console.log("Checklist created succesfully")
     }
+}
+
+export const setTasks = async (data: Task | null) => {
+    
 }

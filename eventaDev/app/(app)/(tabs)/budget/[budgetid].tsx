@@ -6,6 +6,7 @@ import { Budget } from "../../../../interfaces/budgetInterface";
 import { readBudget, createBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
 import { Cost } from "../../../../interfaces/costInterface";
 import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
+import AddCostModal from "../../../../components/budget/AddCostModal";
 
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
@@ -16,6 +17,8 @@ const UserPage = () => {
   const [photographerCosts, setPhotographerCosts] = useState<Cost[]>([]);
   const [entertainmentCosts, setEntertainmentCosts] = useState<Cost[]>([]);
   const [decorationCosts, setDecorationCosts] = useState<Cost[]>([]);
+  const [showModal, setShowModal] = useState<boolean>(false);
+
 
   useEffect(() => {
     console.log(event?.id);
@@ -94,17 +97,12 @@ const decorationCost = async (data: Budget) => {
   await addCost({ budgetID: data.id, vendorType: "Decoration", percentEstimate: 0.06 });
 }
 
-const createCosts = async () => {
+const createCosts = async (budgetID: number, costInDollar: number, vendorType: string) => {
   if (budgetData) {
     await addCost({
-      budgetID: budgetData.id,
-      vendorType: "Vendor",
-      costInDollar: 100,
-      priority: 1,
-      flexibility: false,
-      flexTop: 50,
-      predictedCost: 100,
-      absoluteMinimum: 50,
+      budgetID: budgetID,
+      vendorType: vendorType,
+      costInDollar: costInDollar,
     });
     setCosts(null);
   }
@@ -138,7 +136,7 @@ return (
           <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
           <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
         </View>
-        <TouchableOpacity style={styles.button} onPress={createCosts}>
+        <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
           <Text style={styles.buttonText}>Create a cost</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={changeCosts}>
@@ -163,6 +161,7 @@ return (
             />
           </View>
         )}
+        {showModal && <AddCostModal budget={budgetData} addCost={createCosts} hideModal={() => setShowModal(false)}/>}
       </>
     )}
   </View>

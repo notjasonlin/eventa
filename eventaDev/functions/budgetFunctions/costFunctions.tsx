@@ -57,6 +57,7 @@ export const addCost = async (costData: Record<string, any>) => {
         flexTop: 0,
         predictedCost: 0,
         absoluteMinimum: 0,
+        predictedEstimate: 0,
     };
 
     const mergedData = { ...defaultValues, ...costData };

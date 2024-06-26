@@ -1,7 +1,10 @@
 import { supabase } from "../../lib/supabase";
 import { Cost } from "../../interfaces/costInterface";
 
-export const readCosts = async (budgetID: number): Promise<Cost[] | null> => {
+export const readCosts = async (budgetID: number): Promise<{
+    costs: Cost[], venues: Cost[], catering: Cost[],
+    photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
+} | null> => {
     let { data: costs, error } = await supabase
         .from('costs')
         .select('*')
@@ -13,7 +16,30 @@ export const readCosts = async (budgetID: number): Promise<Cost[] | null> => {
     } else if (!costs) {
         return null;
     } else {
-        return costs;
+        const venues: Cost[] = [];
+        const catering: Cost[] = [];
+        const photographers: Cost[] = [];
+        const entertainment: Cost[] = [];
+        const decoration: Cost[] = [];
+        const other: Cost[] = [];
+
+        costs.filter((cost: Cost) => {
+            if (cost.vendorType === "Venue") {
+                venues.push(cost);
+            } else if (cost.vendorType === "Catering") {
+                catering.push(cost);
+            } else if (cost.vendorType === "Photographers") {
+                photographers.push(cost);
+            } else if (cost.vendorType === "Entertainment") {
+                entertainment.push(cost);
+            } else if (cost.vendorType === "Decoration") {
+                decoration.push(cost);
+            } else {
+                other.push(cost);
+            }
+        });
+
+        return {costs, venues, catering, photographers, entertainment, decoration, other}
     }
 }
 

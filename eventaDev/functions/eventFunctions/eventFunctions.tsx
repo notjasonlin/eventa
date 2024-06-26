@@ -4,7 +4,7 @@ import { Event } from '../../interfaces/eventInterface';
 
 // const dispatch = useDispatch<AppDispatch>()
 
-export const fetchEvents = async (userId: string): Promise<{ events: Event[], pastEvents: Event[]; upcomingEvents: Event[] }> => {
+export const fetchEvents = async (userId: string): Promise<{ events: Event[], pastEvents: Event[], upcomingEvents: Event[] }> => {
   const { data: events, error } = await supabase
     .from("events")
     .select("*")

@@ -8,4 +8,5 @@ export interface Cost {
     flexTop: number,
     predictedCost: number,
     absoluteMinimum: number,
+    percentEstimate: number,
 }

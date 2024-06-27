@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
-import { GenericVendor } from "../../app/(app)/(vendor_files)/genericVendorInterface";
+import { GenericVendor } from "../../interfaces/genericVendorInterface";
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';

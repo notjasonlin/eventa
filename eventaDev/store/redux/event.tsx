@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Event } from "../../interfaces/eventInterface";
-import { BookedVendor } from "../../app/(app)/(vendor_files)/bookedVendorInterface";
-import { GenericVendor } from "../../app/(app)/(vendor_files)/genericVendorInterface";
+import { BookedVendor } from "../../interfaces/bookedVendorInterface";
+import { GenericVendor } from "../../interfaces/genericVendorInterface";
 
 interface SelectedEventState {
     event: Event | null,

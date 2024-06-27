@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Vendor } from "../../app/(app)/(vendor_files)/vendorInterface";
+import { Vendor } from "../../interfaces/vendorInterface";
 
 interface MarketplaceState {
     vendors: Vendor[] | null,

@@ -9,6 +9,7 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
+import { costChangeTrigger } from '../../../store/redux/budget';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
@@ -18,6 +19,9 @@ const SingleVendor = () => {
     const router = useRouter();
     const [showModal, setShowModal] = useState<boolean>(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
+
+    const trigger = useSelector((state: RootState) => state.budgetSystem.costTrigger);
+
 
     const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/venues/default.png` };
 
@@ -72,6 +76,8 @@ const SingleVendor = () => {
                     Alert.alert(`Already booked ${vendor?.name} for ${event.eventName}`)
                 } else {
                     await bookVendor(vendor.id, event.id, vendor.vendorType);
+                    dispatch(costChangeTrigger());
+                    // console.log("Trigger", trigger);
                     setShowModal(false);
                 }
             }

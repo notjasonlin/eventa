@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GenericVendor } from "../../app/(app)/(vendor_files)/genericVendorInterface";
+import { GenericVendor } from "../../interfaces/genericVendorInterface";
 
 interface VendorState {
     vendor: GenericVendor | null;

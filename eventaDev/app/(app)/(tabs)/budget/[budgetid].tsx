@@ -1,171 +1,195 @@
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, FlatList } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../store/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { Budget } from "../../../../interfaces/budgetInterface";
 import { readBudget, createBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
 import { Cost } from "../../../../interfaces/costInterface";
 import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
+import { setBudgetData, setCosts, costChangeTrigger } from "../../../../store/redux/budget";
+import { fetchBookedVendorsNotInBudget, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
 
 const UserPage = () => {
-  const event = useSelector((state: RootState) => state.selectedEvent.event);
-  const [budgetData, setBudgetData] = useState<Budget | null>(null);
-  const [costs, setCosts] = useState<Cost[] | null>(null);
-  const [venueCosts, setVenueCosts] = useState<Cost[]>([]);
-  const [cateringCosts, setCateringCosts] = useState<Cost[]>([]);
-  const [photographerCosts, setPhotographerCosts] = useState<Cost[]>([]);
-  const [entertainmentCosts, setEntertainmentCosts] = useState<Cost[]>([]);
-  const [decorationCosts, setDecorationCosts] = useState<Cost[]>([]);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const dispatch = useDispatch<AppDispatch>();
 
+  const event = useSelector((state: RootState) => state.selectedEvent.event);
+  const budgetData = useSelector((state: RootState) => state.budgetSystem.budgetData);
+  const costs = useSelector((state: RootState) => state.budgetSystem.costs);
+  const remoteTrigger = useSelector((state: RootState) => state.budgetSystem.costTrigger);
+  const [trigger, setTrigger] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
     console.log(event?.id);
-    setBudgetData(null);
-    setCosts(null);
+    dispatch(setBudgetData(null));
+    dispatch(setCosts(null));
 
     if (event?.id) {
       const fetchBudget = async () => {
         const budget = await readBudget(event.id);
-        setBudgetData(budget);
+        dispatch(setBudgetData(budget));
       };
 
       fetchBudget();
+      console.log(budgetData);
     }
   }, [event, event?.id]);
 
   useEffect(() => {
     const fetchCosts = async () => {
-      if (budgetData && !costs) {
+      if (budgetData) {
         const costData = await readCosts(budgetData.id);
         if (costData) {
-          setCosts(costData.costs);
-          setVenueCosts(costData.venues);
-          setCateringCosts(costData.catering);
-          setPhotographerCosts(costData.photographers);
-          setEntertainmentCosts(costData.entertainment);
-          setDecorationCosts(costData.decoration);
+          dispatch(setCosts(costData.costs));
+          // set different cost types here
         }
       }
     }
     fetchCosts();
-  }, [costs, budgetData]);
+  }, [budgetData, trigger]);
 
-const setBudget = async () => {
-  if (event) {
-    await createBudget({
-      eventId: event.id,
-      id: Math.floor(Math.random() * 100),
-      totalCost: 10000,
-      flexible: false,
-      maxFlex: 10,
-    });
-    const data = await readBudget(event.id);
-    if (data) {
-      await Promise.all([
-        venueCost(data),
-        cateringCost(data),
-        photographerCost(data),
-        entertainmentCost(data),
-        decorationCost(data),
-      ]);
+
+  useEffect(() => {
+    // console.log(vendors);
+
+    const bookedVendorCosts = async() => {
+      if (event && budgetData) {
+        const vendorsToAdd = await fetchBookedVendorsNotInBudget(event.id);
+        // console.log("Vendors");
+        // console.log("Trigger", trigger);
+        // console.log(vendorsToAdd);
+        if (vendorsToAdd) {
+          for (let i = 0, n = vendorsToAdd.length; i < n; i++) {
+            const curr = vendorsToAdd[i];
+            addCost({
+              budgetID: budgetData?.id,
+              vendorType: curr.vendorType,
+              // Add other details once available
+            })
+            await setBookedVendorInBudget(curr.vendorID, curr.eventID, true);
+          }
+          setTrigger(!trigger);
+        }
+      }
     }
-    setBudgetData(data);
-  } else {
-    console.error("No selected event");
+    bookedVendorCosts();
+  }, [budgetData, remoteTrigger])
+
+  const setBudget = async () => {
+    if (event) {
+      await createBudget({
+        eventId: event.id,
+        id: Math.floor(Math.random() * 100),
+        totalCost: 10000,
+        flexible: false,
+        maxFlex: 10,
+      });
+      const data = await readBudget(event.id);
+      if (data) {
+        await Promise.all([
+          venueCost(data),
+          cateringCost(data),
+          photographerCost(data),
+          entertainmentCost(data),
+          decorationCost(data),
+        ]);
+      }
+      dispatch(setBudgetData(data));
+    } else {
+      console.error("No selected event");
+    }
   }
-}
 
-const venueCost = async (data: Budget) => {
-  await addCost({ budgetID: data.id, vendorType: "Venue", percentEstimate: 0.18, });
-}
+  const venueCost = async (data: Budget) => {
+    await addCost({ budgetID: data.id, vendorType: "Venue", percentEstimate: 0.18, });
+    // Add data to specific cost types
+  }
 
-const cateringCost = async (data: Budget) => {
-  await addCost({ budgetID: data.id, vendorType: "Catering", percentEstimate: 0.30, });
-}
+  const cateringCost = async (data: Budget) => {
+    await addCost({ budgetID: data.id, vendorType: "Catering", percentEstimate: 0.30, });
+  }
 
-const photographerCost = async (data: Budget) => {
-  await addCost({ budgetID: data.id, vendorType: "Photographers", percentEstimate: 0.14 });
-}
+  const photographerCost = async (data: Budget) => {
+    await addCost({ budgetID: data.id, vendorType: "Photographers", percentEstimate: 0.14 });
+  }
 
-const entertainmentCost = async (data: Budget) => {
-  await addCost({ budgetID: data.id, vendorType: "Entertainment", percentEstimate: 0.12 });
-}
+  const entertainmentCost = async (data: Budget) => {
+    await addCost({ budgetID: data.id, vendorType: "Entertainment", percentEstimate: 0.12 });
+  }
 
-const decorationCost = async (data: Budget) => {
-  await addCost({ budgetID: data.id, vendorType: "Decoration", percentEstimate: 0.06 });
-}
+  const decorationCost = async (data: Budget) => {
+    await addCost({ budgetID: data.id, vendorType: "Decoration", percentEstimate: 0.06 });
+  }
 
-const createCosts = async (budgetID: number, costInDollar: number, vendorType: string) => {
-  if (budgetData) {
+  const createCosts = async (budgetID: number, costInDollar: number, vendorType: string) => {
     await addCost({
       budgetID: budgetID,
       vendorType: vendorType,
       costInDollar: costInDollar,
     });
-    setCosts(null);
+    setTrigger(!trigger);
   }
-}
 
-const changeCosts = async () => {
-  if (budgetData && costs) {
-    await updateCost(budgetData.id, costs[0].id, { "vendorType": "Venue" });
-    setCosts(null);
+
+  const changeCosts = async () => {
+    if (budgetData && costs) {
+      await updateCost(budgetData.id, costs[0].id, { "vendorType": "Venue" });
+      setTrigger(!trigger);
+    }
   }
-}
 
-const removeCost = async (costID: number) => {
-  if (budgetData && costs) {
-    await deleteCost(costID);
-    setCosts(null);
+  const removeCost = async (costID: number) => {
+    if (budgetData && costs) {
+      await deleteCost(costID);
+      setTrigger(!trigger);
+    }
   }
-}
 
-return (
-  <View style={styles.container}>
-    <Text style={styles.title}>Budget</Text>
-    {!budgetData && (
-      <TouchableOpacity style={styles.button} onPress={setBudget}>
-        <Text style={styles.buttonText}>Set budget!</Text>
-      </TouchableOpacity>
-    )}
-    {budgetData && (
-      <>
-        <View style={styles.budgetContainer}>
-          <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
-          <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
-          <Text style={styles.buttonText}>Create a cost</Text>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Budget</Text>
+      {!budgetData && (
+        <TouchableOpacity style={styles.button} onPress={setBudget}>
+          <Text style={styles.buttonText}>Set budget!</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={changeCosts}>
-          <Text style={styles.buttonText}>Update a cost</Text>
-        </TouchableOpacity>
-        {costs && (
-          <View style={styles.costsContainer}>
-            <FlatList
-              data={costs}
-              renderItem={({ item }) => (
-                <View style={styles.costItem}>
-                  <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
-                  <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
-                  <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
-                  <TouchableOpacity onPress={() => removeCost(item.id)}>
-                    <Text>DELETE</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              keyExtractor={item => item.id.toString()}
-              contentContainerStyle={styles.flatListContent}
-            />
+      )}
+      {budgetData && (
+        <>
+          <View style={styles.budgetContainer}>
+            <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
+            <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
           </View>
-        )}
-        {showModal && <AddCostModal budget={budgetData} addCost={createCosts} hideModal={() => setShowModal(false)}/>}
-      </>
-    )}
-  </View>
-);
+          <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
+            <Text style={styles.buttonText}>Create a cost</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={changeCosts}>
+            <Text style={styles.buttonText}>Update a cost</Text>
+          </TouchableOpacity>
+          {costs && (
+            <View style={styles.costsContainer}>
+              <FlatList
+                data={costs}
+                renderItem={({ item }) => (
+                  <View style={styles.costItem}>
+                    <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
+                    <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
+                    <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
+                    <TouchableOpacity onPress={() => removeCost(item.id)}>
+                      <Text>DELETE</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                keyExtractor={item => item.id.toString()}
+                contentContainerStyle={styles.flatListContent}
+              />
+            </View>
+          )}
+          {showModal && <AddCostModal budget={budgetData} addCost={createCosts} hideModal={() => setShowModal(false)} />}
+        </>
+      )}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

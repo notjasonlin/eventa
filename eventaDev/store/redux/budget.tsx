@@ -10,7 +10,7 @@ interface BudgetSystemState {
     photographerCosts: Cost[] | null,
     entertainmentCosts: Cost[] | null,
     decorationCosts: Cost[] | null,
-    costTrigger: boolean,
+    costTriggers: boolean[],
 }
 
 const initialState: BudgetSystemState = {
@@ -21,7 +21,7 @@ const initialState: BudgetSystemState = {
     photographerCosts: null,
     entertainmentCosts: null,
     decorationCosts: null,
-    costTrigger: false,
+    costTriggers: [false, false, false], // use trigger for changes to following in this order [add, delete, update]
 }
 
 const budgetSlice = createSlice({
@@ -49,12 +49,18 @@ const budgetSlice = createSlice({
         setDecorationCosts(state, action: PayloadAction<Cost[] | null>) {
             state.decorationCosts = action.payload;
         },
-        costChangeTrigger(state) {
-            state.costTrigger = !state.costTrigger;
-        }
+        costAddTrigger(state) {
+            state.costTriggers[0] = !state.costTriggers[0];
+        },
+        costDeleteTrigger(state) {
+            state.costTriggers[1] = !state.costTriggers[1];
+        },
+        costUpdateTrigger(state) {
+            state.costTriggers[2] = !state.costTriggers[2];
+        },
     }
 })
 
-export const { setBudgetData, setCosts, setVenueCosts, setCateringCosts,
-    setPhotographerCosts, setEntertainmentCosts, setDecorationCosts, costChangeTrigger} = budgetSlice.actions;
+export const { setBudgetData, setCosts, setVenueCosts, setCateringCosts, setPhotographerCosts, 
+    setEntertainmentCosts, setDecorationCosts, costAddTrigger, costDeleteTrigger, costUpdateTrigger} = budgetSlice.actions;
 export default budgetSlice.reducer;

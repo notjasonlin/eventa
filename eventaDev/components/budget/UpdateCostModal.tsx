@@ -2,23 +2,40 @@ import { Modal, Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity, 
 import { Cost } from "../../interfaces/costInterface";
 import { Budget } from "../../interfaces/budgetInterface";
 import { useState } from "react";
+import { GenericVendor } from "../../interfaces/genericVendorInterface";
+import { updateCost } from "../../functions/budgetFunctions/costFunctions";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store/redux/store";
+import { costUpdateTrigger } from "../../store/redux/budget";
 
 type AddCostModalProps = {
-    addCost: (budgetID: string, costInDollar: number, vendorType: string) => Promise<void>
     hideModal: () => void
     budget: Budget
+    cost: Cost
+    vendor?: GenericVendor
 }
 
-const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
+const UpdateCostModal = ({ hideModal, budget, cost, vendor }: AddCostModalProps) => {
+    const dispatch = useDispatch<AppDispatch>();
     const [costInDollar, setCostInDollar] = useState<number | null>(0);
     const [vendorType, setVendorType] = useState<string | null>("");
 
-    const add = async () => {
-        if (costInDollar && vendorType) {
-            await addCost(budget.id, costInDollar, vendorType);
+    const update = async () => {
+        console.log("UPDATE")
+        console.log(costInDollar)
+        console.log(vendorType)
+
+        if (costInDollar) { // && (vendorType || !vendor)
+            let changes: Record<string, any> = {};
+            // if (!vendor) {
+            //     changes.vendorType = vendorType;
+            // }
+            changes.costInDollar = costInDollar;
+
+            console.log(changes);
+            await updateCost(budget.id, cost.id, changes);
+            dispatch(costUpdateTrigger());
             hideModal();
-        } else {
-            Alert.alert("Fill out the whole form");
         }
     }
 
@@ -26,7 +43,7 @@ const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
         <Modal animationType="fade" visible={true} transparent={true}>
             <Pressable onPress={hideModal} style={styles.modalBackDrop}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Add Cost</Text>
+                    <Text style={styles.modalTitle}>Update Cost</Text>
                     <TextInput
                         style={styles.input}
                         keyboardType="number-pad"
@@ -34,14 +51,14 @@ const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
                         placeholder="Cost in Dollars"
                         placeholderTextColor="#888"
                     />
-                    <TextInput
+                    {!vendor && <TextInput
                         style={styles.input}
                         onChangeText={(text) => setVendorType(text)}
                         placeholder="Vendor Type"
                         placeholderTextColor="#888"
-                    />
-                    <TouchableOpacity onPress={add} style={styles.addButton}>
-                        <Text style={styles.addButtonText}>Add Cost</Text>
+                    />}
+                    <TouchableOpacity onPress={update} style={styles.addButton}>
+                        <Text style={styles.addButtonText}>Update Cost</Text>
                     </TouchableOpacity>
                 </View>
             </Pressable>
@@ -98,4 +115,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default AddCostModal;
+export default UpdateCostModal;

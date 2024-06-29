@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import { Cost } from "../../interfaces/costInterface";
+import uuid from 'react-native-uuid'; 
 
 export const readCosts = async (budgetID: string): Promise<{
     costs: Cost[], venues: Cost[], catering: Cost[],
@@ -43,12 +44,29 @@ export const readCosts = async (budgetID: string): Promise<{
     }
 }
 
+export const readCost = async (budgetID: string, costID: string): Promise<Cost | null> => {
+    let { data: cost, error } = await supabase
+        .from('costs')
+        .select('*')
+        .eq('budgetID', budgetID)
+        .eq("id", costID)
+
+    if (error) {
+        console.error(error);
+        return null;
+    } else if (!cost) {
+        return null;
+    } else {
+        return cost[0];
+    }
+}
+
 export const addCost = async (costData: Record<string, any>) => {
     console.log("Data: ");
     console.log(costData);
 
     const defaultValues = {
-        id: Math.floor(Math.random() * 100),
+        id: uuid.v4().toString(),
         budgetID: 0,
         vendorType: '',
         costInDollar: 0,
@@ -86,7 +104,7 @@ export const addCost = async (costData: Record<string, any>) => {
     }
 };
 
-export const updateCost = async (budgetID: string, costID: number, column: Record<string, any>) => { // change budget and cost ID to string when uuid
+export const updateCost = async (budgetID: string, costID: string, column: Record<string, any>) => { // change budget and cost ID to string when uuid
     const { data, error } = await supabase
         .from('costs')
         .update(column)
@@ -99,7 +117,7 @@ export const updateCost = async (budgetID: string, costID: number, column: Recor
     }
 }
 
-export const deleteCost = async (costID: number) => {
+export const deleteCost = async (costID: string) => {
     const { error } = await supabase
         .from('costs')
         .delete()

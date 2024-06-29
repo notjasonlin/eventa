@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, FlatList, Alert } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../../store/redux/store";
-import { Budget } from "../../../../interfaces/budgetInterface";
-import { readBudget, createBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
+import { readBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
 import { Cost } from "../../../../interfaces/costInterface";
 import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
 import { setBudgetData, setCosts } from "../../../../store/redux/budget";
 import { fetchBookedVendorsNotInBudget, removeBookedVendor, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 const UserPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,7 +17,7 @@ const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
   const budgetData = useSelector((state: RootState) => state.budgetSystem.budgetData);
   const costs = useSelector((state: RootState) => state.budgetSystem.costs);
-  const remoteTrigger = useSelector((state: RootState) => state.budgetSystem.costTrigger);
+  const remoteTriggers = useSelector((state: RootState) => state.budgetSystem.costTriggers);
   const [trigger, setTrigger] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
 
@@ -46,7 +45,7 @@ const UserPage = () => {
       }
     }
     fetchCosts();
-  }, [budgetData, trigger]);
+  }, [budgetData, trigger, remoteTriggers[1], remoteTriggers[2]]);
 
 
   useEffect(() => {
@@ -70,31 +69,15 @@ const UserPage = () => {
       }
     }
     bookedVendorCosts();
-  }, [budgetData, remoteTrigger])
+  }, [budgetData, remoteTriggers[0]])
 
-  const createCosts = async (budgetID: number, costInDollar: number, vendorType: string) => {
+  const createCosts = async (budgetID: string, costInDollar: number, vendorType: string) => {
     await addCost({
       budgetID: budgetID,
       vendorType: vendorType,
       costInDollar: costInDollar,
     });
     setTrigger(!trigger);
-  }
-
-
-  const changeCosts = async () => {
-    if (budgetData && costs) {
-      await updateCost(budgetData.id, costs[0].id, { "vendorType": "Venue" });
-      setTrigger(!trigger);
-    }
-  }
-
-  const removeCost = async (cost: Cost) => {
-    if (budgetData && costs && event) {
-      await deleteCost(cost.id);
-      await removeBookedVendor(cost.vendorID, event.id);
-      setTrigger(!trigger);
-    }
   }
 
   return (
@@ -120,22 +103,22 @@ const UserPage = () => {
           <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
             <Text style={styles.buttonText}>Create a cost</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={changeCosts}>
-            <Text style={styles.buttonText}>Update a cost</Text>
-          </TouchableOpacity>
           {costs && (
             <View style={styles.costsContainer}>
               <FlatList
                 data={costs}
                 renderItem={({ item }) => (
-                  <View style={styles.costItem}>
-                    <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
-                    <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
-                    <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
-                    <TouchableOpacity onPress={() => removeCost(item)}>
-                      <Text>DELETE</Text>
+                  <Link href={{
+                    pathname: "/(budget_files)/SingleCost",
+                    params: { costID: item.id }
+
+                  }} asChild>
+                    <TouchableOpacity style={styles.costItem}>
+                      <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
+                      <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
+                      <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
                     </TouchableOpacity>
-                  </View>
+                  </Link>
                 )}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.flatListContent}
@@ -144,8 +127,9 @@ const UserPage = () => {
           )}
           {showModal && <AddCostModal budget={budgetData} addCost={createCosts} hideModal={() => setShowModal(false)} />}
         </>
-      )}
-    </View>
+      )
+      }
+    </View >
   );
 };
 

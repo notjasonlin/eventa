@@ -9,7 +9,7 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
-import { costChangeTrigger } from '../../../store/redux/budget';
+import { costAddTrigger } from '../../../store/redux/budget';
 import { readBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 
 const SingleVendor = () => {
@@ -80,7 +80,7 @@ const SingleVendor = () => {
             if (vendor?.id !== undefined) {
                 const completeBook = async () => {
                     await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost);
-                    dispatch(costChangeTrigger());
+                    dispatch(costAddTrigger());
                     setShowModal(false);
                 }
 
@@ -97,7 +97,6 @@ const SingleVendor = () => {
                         },
                         {
                             text: "Cancel",
-
                             style: "cancel",
                         }
                     ]);

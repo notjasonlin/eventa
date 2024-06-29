@@ -5,5 +5,6 @@ export interface GenericVendor {
     verified: boolean;
     vendorType: string;
     created_at: string;
+    cost: number;
   }
   

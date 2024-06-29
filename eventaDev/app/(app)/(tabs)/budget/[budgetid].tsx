@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View, StyleSheet, FlatList } from "react-native";
+import { Text, TouchableOpacity, View, StyleSheet, FlatList, Alert } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { Budget } from "../../../../interfaces/budgetInterface";
@@ -7,11 +7,13 @@ import { readBudget, createBudget } from "../../../../functions/budgetFunctions/
 import { Cost } from "../../../../interfaces/costInterface";
 import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
-import { setBudgetData, setCosts, costChangeTrigger } from "../../../../store/redux/budget";
-import { fetchBookedVendorsNotInBudget, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
+import { setBudgetData, setCosts } from "../../../../store/redux/budget";
+import { fetchBookedVendorsNotInBudget, removeBookedVendor, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
+import { useRouter } from "expo-router";
 
 const UserPage = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
 
   const event = useSelector((state: RootState) => state.selectedEvent.event);
   const budgetData = useSelector((state: RootState) => state.budgetSystem.budgetData);
@@ -21,7 +23,6 @@ const UserPage = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
-    console.log(event?.id);
     dispatch(setBudgetData(null));
     dispatch(setCosts(null));
 
@@ -30,9 +31,7 @@ const UserPage = () => {
         const budget = await readBudget(event.id);
         dispatch(setBudgetData(budget));
       };
-
       fetchBudget();
-      console.log(budgetData);
     }
   }, [event, event?.id]);
 
@@ -51,20 +50,17 @@ const UserPage = () => {
 
 
   useEffect(() => {
-    // console.log(vendors);
-
-    const bookedVendorCosts = async() => {
+    const bookedVendorCosts = async () => {
       if (event && budgetData) {
         const vendorsToAdd = await fetchBookedVendorsNotInBudget(event.id);
-        // console.log("Vendors");
-        // console.log("Trigger", trigger);
-        // console.log(vendorsToAdd);
         if (vendorsToAdd) {
           for (let i = 0, n = vendorsToAdd.length; i < n; i++) {
             const curr = vendorsToAdd[i];
             addCost({
               budgetID: budgetData?.id,
               vendorType: curr.vendorType,
+              vendorID: curr.vendorID,
+              costInDollar: curr.cost,
               // Add other details once available
             })
             await setBookedVendorInBudget(curr.vendorID, curr.eventID, true);
@@ -75,52 +71,6 @@ const UserPage = () => {
     }
     bookedVendorCosts();
   }, [budgetData, remoteTrigger])
-
-  const setBudget = async () => {
-    if (event) {
-      await createBudget({
-        eventId: event.id,
-        id: Math.floor(Math.random() * 100),
-        totalCost: 10000,
-        flexible: false,
-        maxFlex: 10,
-      });
-      const data = await readBudget(event.id);
-      if (data) {
-        await Promise.all([
-          venueCost(data),
-          cateringCost(data),
-          photographerCost(data),
-          entertainmentCost(data),
-          decorationCost(data),
-        ]);
-      }
-      dispatch(setBudgetData(data));
-    } else {
-      console.error("No selected event");
-    }
-  }
-
-  const venueCost = async (data: Budget) => {
-    await addCost({ budgetID: data.id, vendorType: "Venue", percentEstimate: 0.18, });
-    // Add data to specific cost types
-  }
-
-  const cateringCost = async (data: Budget) => {
-    await addCost({ budgetID: data.id, vendorType: "Catering", percentEstimate: 0.30, });
-  }
-
-  const photographerCost = async (data: Budget) => {
-    await addCost({ budgetID: data.id, vendorType: "Photographers", percentEstimate: 0.14 });
-  }
-
-  const entertainmentCost = async (data: Budget) => {
-    await addCost({ budgetID: data.id, vendorType: "Entertainment", percentEstimate: 0.12 });
-  }
-
-  const decorationCost = async (data: Budget) => {
-    await addCost({ budgetID: data.id, vendorType: "Decoration", percentEstimate: 0.06 });
-  }
 
   const createCosts = async (budgetID: number, costInDollar: number, vendorType: string) => {
     await addCost({
@@ -139,9 +89,10 @@ const UserPage = () => {
     }
   }
 
-  const removeCost = async (costID: number) => {
-    if (budgetData && costs) {
-      await deleteCost(costID);
+  const removeCost = async (cost: Cost) => {
+    if (budgetData && costs && event) {
+      await deleteCost(cost.id);
+      await removeBookedVendor(cost.vendorID, event.id);
       setTrigger(!trigger);
     }
   }
@@ -150,7 +101,13 @@ const UserPage = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Budget</Text>
       {!budgetData && (
-        <TouchableOpacity style={styles.button} onPress={setBudget}>
+        <TouchableOpacity style={styles.button} onPress={() => {
+          if (!event) {
+            Alert.alert("No selected event!");
+          } else {
+            router.push("/(budget_files)/BudgetForm")
+          }
+        }}>
           <Text style={styles.buttonText}>Set budget!</Text>
         </TouchableOpacity>
       )}
@@ -175,7 +132,7 @@ const UserPage = () => {
                     <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
                     <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
                     <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
-                    <TouchableOpacity onPress={() => removeCost(item.id)}>
+                    <TouchableOpacity onPress={() => removeCost(item)}>
                       <Text>DELETE</Text>
                     </TouchableOpacity>
                   </View>

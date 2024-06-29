@@ -1,7 +1,7 @@
 import { supabase } from "../../lib/supabase";
 import { Cost } from "../../interfaces/costInterface";
 
-export const readCosts = async (budgetID: number): Promise<{
+export const readCosts = async (budgetID: string): Promise<{
     costs: Cost[], venues: Cost[], catering: Cost[],
     photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
 } | null> => {
@@ -58,6 +58,7 @@ export const addCost = async (costData: Record<string, any>) => {
         predictedCost: 0,
         absoluteMinimum: 0,
         predictedEstimate: 0,
+        vendorID: null,
     };
 
     const mergedData = { ...defaultValues, ...costData };
@@ -72,6 +73,8 @@ export const addCost = async (costData: Record<string, any>) => {
         flexTop: mergedData.flexTop,
         predictedCost: mergedData.predictedCost,
         absoluteMinimum: mergedData.absoluteMinimum,
+        percentEstimate: mergedData.predictedEstimate,
+        vendorID: mergedData.vendorID,
     };
 
     const { data, error } = await supabase
@@ -83,7 +86,7 @@ export const addCost = async (costData: Record<string, any>) => {
     }
 };
 
-export const updateCost = async (budgetID: number, costID: number, column: Record<string, any>) => { // change budget and cost ID to string when uuid
+export const updateCost = async (budgetID: string, costID: number, column: Record<string, any>) => { // change budget and cost ID to string when uuid
     const { data, error } = await supabase
         .from('costs')
         .update(column)

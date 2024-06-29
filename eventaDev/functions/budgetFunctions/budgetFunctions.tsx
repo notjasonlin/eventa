@@ -6,8 +6,6 @@ export const readBudget = async (eventID: string): Promise<Budget | null> => {
         .from('budget')
         .select('*')
         .eq("eventId", eventID)
-
-    // console.log(budget);
     
     if (error) {
         console.error(error);

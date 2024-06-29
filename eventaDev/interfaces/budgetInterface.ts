@@ -1,6 +1,6 @@
 export interface Budget {
     eventId: string,
-    id: number,
+    id: string,
     totalCost: number,
     flexible: boolean,
     maxFlex: number,

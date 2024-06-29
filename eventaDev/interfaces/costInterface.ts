@@ -9,4 +9,5 @@ export interface Cost {
     predictedCost: number,
     absoluteMinimum: number,
     percentEstimate: number,
+    vendorID: string,
 }

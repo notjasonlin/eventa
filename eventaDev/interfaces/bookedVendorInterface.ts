@@ -3,5 +3,6 @@ export interface BookedVendor {
     eventID: string;
     vendorType: string;
     inBudget: boolean;
+    cost: number;
   }
   

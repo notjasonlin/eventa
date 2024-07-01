@@ -23,13 +23,13 @@ export const HomePage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Home Page</Text>
+      <Text style={styles.eventTitle}>Home Page</Text>
       <Text style={styles.email}>Welcome back, {name}!</Text>
       <StyleButton onPress={addImageButtonHandler}>Add image!</StyleButton>
       {/* <ImageButton uri={uri} /> */}
       <EventSelector />
-
       {event && <EventDisplay />}
+      
 
       {/* <Link href="/users/1">Go to user 1</Link>
       <Link href="/users/2">Go to user 2</Link>
@@ -46,11 +46,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flex: 1,
   },
-  title: {
-    fontSize: 24,
+  eventTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#000',
+    color: '#4A4A4A',
+    marginBottom: 5,
   },
   email: {
     fontSize: 16,

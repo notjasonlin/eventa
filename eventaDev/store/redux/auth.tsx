@@ -30,6 +30,12 @@ const authSlice = createSlice({
             .addCase(signOut.fulfilled, (state, action: PayloadAction<null>) => {
                 state.session = action.payload;
             })
+            .addCase(signInWithPhone.fulfilled, (state, action: PayloadAction<Session | null>) => {
+                state.session = action.payload;
+            })
+            .addCase(verifyOtp.fulfilled, (state, action: PayloadAction<Session | null>) => {
+                state.session = action.payload;
+            });
     },
 });
 
@@ -37,7 +43,6 @@ const authSlice = createSlice({
 
 export const signIn = createAsyncThunk(
     "auth/signIn",
-    // Must pass in parameters as payload object (single parameter)
     async ({ email, password }: { email: string, password: string }) => {
         const { data: { session }, error } = await supabase.auth.signInWithPassword({
             email: email,
@@ -72,6 +77,31 @@ export const signOut = createAsyncThunk(
     }
 )
 
+export const signInWithPhone = createAsyncThunk(
+    "auth/signInWithPhone",
+    async ({ phone }: { phone: string }) => {
+        const { error } = await supabase.auth.signInWithOtp({
+            phone,
+        });
+
+        if (error) Alert.alert(error.message);
+        return null; // Return null as session will be set after OTP verification
+    }
+)
+
+export const verifyOtp = createAsyncThunk(
+    "auth/verifyOtp",
+    async ({ phone, otp }: { phone: string, otp: string }) => {
+        const { data: { session }, error } = await supabase.auth.verifyOtp({
+            phone,
+            token: otp,
+            type: 'sms'
+        });
+
+        if (error) Alert.alert(error.message);
+        return session;
+    }
+)
 
 export const { setSession } = authSlice.actions;
 export default authSlice.reducer;

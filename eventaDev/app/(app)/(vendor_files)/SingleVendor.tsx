@@ -22,9 +22,6 @@ const SingleVendor = () => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
 
-    const trigger = useSelector((state: RootState) => state.budgetSystem.costTrigger);
-
-
     const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/venues/default.png` };
 
     useEffect(() => {

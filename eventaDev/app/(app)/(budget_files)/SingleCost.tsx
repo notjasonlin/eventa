@@ -23,7 +23,7 @@ const SingleCost = () => {
 
     useEffect(() => {
         const fetchCost = async () => {
-            if (budgetData && typeof (costID) === "string") {
+            if (budgetData && (typeof(costID) === "string")) {
                 const data = await readCost(budgetData?.id, costID)
                 setCost(data);
             }
@@ -82,7 +82,7 @@ const SingleCost = () => {
                         <Text style={styles.buttonText}>Update</Text>
                     </TouchableOpacity>
                     {showModal && budgetData &&
-                        <UpdateCostModal hideModal={() => setShowModal(false)} budget={budgetData} cost={cost} vendor={vendor}/>
+                        <UpdateCostModal hideModal={() => setShowModal(false)} budget={budgetData} cost={cost} vendor={vendor} />
                     }
                 </View>
             }

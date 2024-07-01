@@ -5,7 +5,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Octicons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
-import EventSelector from "../../../components/event/EventSelector";
 
 const renderHeaderRight = () => (
   <View style={{ flexDirection: "row", marginLeft: 10 }}>

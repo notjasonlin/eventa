@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         height: 50,
-        width: 100,
+        width: 300,
         marginBottom: 20,
     },
     button: {

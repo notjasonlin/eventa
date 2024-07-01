@@ -19,7 +19,7 @@ const BudgetForm = () => {
           await createBudget({
             eventId: event.id,
             id: uuid.v4().toString(),
-            totalCost: 10000,
+            totalCost: totalBudget,
             flexible: options[1],
             maxFlex: 0,
           });

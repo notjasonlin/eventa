@@ -74,6 +74,7 @@ const SingleCost = () => {
                 <View style={styles.container}>
                     <Text style={styles.title}>Party Cost</Text>
                     <Text style={styles.vendorName}>{vendor.name}</Text>
+                    <Text>{"Cost: $" + cost.costInDollar}</Text>
                     <TouchableOpacity style={styles.button} onPress={removeCost}>
                         <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>

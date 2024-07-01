@@ -28,7 +28,6 @@ const TabsLayout = () => {
         options={{
           title: "Home",
           headerRight: renderHeaderRight,
-          headerLeft: () => <EventSelector />,
           tabBarIcon: () => <AntDesign name="home" size={23} color="black" />
         }}
       />

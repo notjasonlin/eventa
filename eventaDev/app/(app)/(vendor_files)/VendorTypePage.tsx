@@ -2,7 +2,7 @@ import { View, Text, FlatList } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { supabase } from "../../../lib/supabase";
 import { useEffect, useLayoutEffect, useState } from "react";
-import { GenericVendor } from "./genericVendorInterface";
+import { GenericVendor } from "../../../interfaces/genericVendorInterface";
 import VendorBar from "../../../components/vendor/VendorBar";
 
 const VendorTypePage = () => {

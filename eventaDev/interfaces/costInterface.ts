@@ -1,6 +1,6 @@
 export interface Cost {
-    id: number,
-    budgetID: number,
+    id: string,
+    budgetID: string,
     vendorType: string,
     costInDollar: number,
     priority: number,
@@ -8,4 +8,6 @@ export interface Cost {
     flexTop: number,
     predictedCost: number,
     absoluteMinimum: number,
+    percentEstimate: number,
+    vendorID: string,
 }

@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import { GenericVendor } from "../app/(app)/(vendor_files)/genericVendorInterface";
+import { GenericVendor } from "../interfaces/genericVendorInterface";
 
 interface BookedVendorCardProps {
     vendors: GenericVendor[] | null;

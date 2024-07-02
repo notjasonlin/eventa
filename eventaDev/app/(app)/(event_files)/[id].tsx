@@ -11,8 +11,8 @@ import { readBookedVendorByEvent } from "../../../functions/vendorFunctions/book
 import { Event } from "../../../interfaces/eventInterface";
 import { selectVendorByTypeAndID } from "../../../functions/vendorFunctions/vendorFunctions";
 import BookedVendorCard from "../../../components/BookedVendorCard";
-import { GenericVendor } from "../(vendor_files)/genericVendorInterface";
-import { BookedVendor } from "../(vendor_files)/bookedVendorInterface";
+import { GenericVendor } from "../../../interfaces/genericVendorInterface";
+import { BookedVendor } from "../../../interfaces/bookedVendorInterface";
 
 // Use for when selecting event from individual vendor page
 // import { setEvent, setBookedVendors, setVenues, setCatering, 

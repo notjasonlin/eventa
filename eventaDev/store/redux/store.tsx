@@ -4,6 +4,7 @@ import vendorReducer from "./vendor";
 import eventsReducer from "./events";
 import eventReducer from "./event";
 import marketplaceReducer from "./marketplace";
+import budgetReducer from "./budget";
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         currentEvents: eventsReducer,
         selectedEvent: eventReducer,
         vendorMarketplace: marketplaceReducer,
+        budgetSystem: budgetReducer,
     }
 });
 

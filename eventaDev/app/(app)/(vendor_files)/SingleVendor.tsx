@@ -9,11 +9,14 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
+import { costAddTrigger } from '../../../store/redux/budget';
+import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
     const upcomingEvents = useSelector((state: RootState) => state.currentEvents.upcomingEvents);
     const session = useSelector((state: RootState) => state.authentication.session);
+    const budget = useSelector((state: RootState) => state.budgetSystem.budgetData);
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
     const [showModal, setShowModal] = useState<boolean>(false);
@@ -64,15 +67,50 @@ const SingleVendor = () => {
 
 
     const handleBook = async (event: Event) => {
+        let budgetData = budget;
+        if (!budgetData) {
+            budgetData = await readBudget(event.id);
+        }
+
+        let remainder = 0;
+        if (budgetData) {
+            remainder = budgetData.remainder;
+        }
+
         const book = async () => {
             if (vendor?.id !== undefined) {
-                // console.log("ID " + event.id);
+                const completeBook = async () => {
+                    if (budgetData) {
+                        // console.log("START");
+                        // console.log(budgetData)
+                        // console.log(vendor.id)
+                        // console.log("END");
+                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost);
+                        await updateBudget(budgetData.id, remainder, vendor.cost);
+                        dispatch(costAddTrigger());
+                        setShowModal(false);
+                    }
+
+                }
+
                 const booking = await selectBookedVendor(vendor.id, event.id, vendor.vendorType)
                 if (booking && booking.length > 0) {
                     Alert.alert(`Already booked ${vendor?.name} for ${event.eventName}`)
+                } else if (!remainder) {
+                    Alert.alert("No Budget Set", "Must set your budget before booking vendor"); // Navigate to budget setting page
+                } else if (vendor.cost > remainder) {
+                    Alert.alert("Going over budget", "Are you sure you want to add this vendor as a cost?", [ // Navigate to budget setting page
+                        {
+                            text: "Book",
+                            onPress: completeBook
+                        },
+                        {
+                            text: "Cancel",
+                            style: "cancel",
+                        }
+                    ]);
                 } else {
-                    await bookVendor(vendor.id, event.id, vendor.vendorType);
-                    setShowModal(false);
+                    completeBook();
                 }
             }
         }
@@ -109,7 +147,10 @@ const SingleVendor = () => {
             </View>
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>Capacity</Text>
-                <Text style={styles.infoText}>Cost</Text>
+                <View>
+                    <Text style={styles.infoText}>Cost</Text>
+                    <Text style={styles.infoText}>${vendor?.cost}</Text>
+                </View>
             </View>
             <Text style={styles.descriptionText}>Description</Text>
             <Text style={styles.policyText}>Policy</Text>

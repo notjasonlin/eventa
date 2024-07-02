@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../../store/redux/store';
 import { setEvents } from '../../store/redux/events';
@@ -17,68 +17,70 @@ const EventSelector: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const session = useSelector((state: RootState) => state.authentication.session);
     const events = useSelector((state: RootState) => state.currentEvents.events);
-    // const [formData, setFormData] = useState<Event | null>(null);
     const [showDropdown, setShowDropdown] = useState<boolean>(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | null>(null);
     const [items, setItems] = useState<DropdownItem[]>([]);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            if (session) {
-                const { data, error } = await supabase
-                    .from("events")
-                    .select("*")
-                    .eq("userId", session.user.id);
+    const fetchEvents = useCallback(async () => {
+        if (session) {
+            const { data, error } = await supabase
+                .from("events")
+                .select("*")
+                .eq("userId", session.user.id);
 
-                if (error) {
-                    console.log("Error fetching events: ", error);
-                } else if (data) {
-                    dispatch(setEvents(data));
-                    setItems(data.map((event: Event) => ({ label: event.eventName, value: event.id })));
+            if (error) {
+                console.log("Error fetching events: ", error);
+            } else if (data) {
+                dispatch(setEvents(data));
+                setItems(data.map((event: Event) => ({ label: event.eventName, value: event.id })));
+
+                // Set the selected event
+                const selectedEvent = data.find((event: Event) => event.selected);
+                if (selectedEvent) {
+                    dispatch(setEvent(selectedEvent));
                 }
             }
-        };
-
-        fetchEvents();
+        }
     }, [session, dispatch]);
 
-    // useEffect(() => {
-    //     const fetchEventDetails = async () => {
-    //         if (selectedEvent) {
-    //             // console.log("Fetching details for selected event: ", selectedEvent.id);
-    //             const { data, error } = await supabase
-    //                 .from("events")
-    //                 .select("*")
-    //                 .eq("id", selectedEvent.id)
-    //                 .single();
+    useEffect(() => {
+        fetchEvents();
+    }, [session, fetchEvents]);
 
-    //             if (error) {
-    //                 console.log("Error fetching details: ", error);
-    //             } else if (data) {
-    //                 // console.log("Fetched event details: ", data);
-    //                 setFormData(data);
-    //             }
-    //         }
-    //     };
+    const handleChange = async (eventValue: string | null) => {
+        if (session) {
+            // Set all events to selected = false
+            const { error: updateError1 } = await supabase
+                .from('events')
+                .update({ selected: false })
+                .eq('userId', session.user.id);
 
-    //     fetchEventDetails();
-    // }, [selectedEvent]);
+            if (updateError1) {
+                console.log("Error updating events: ", updateError1);
+                return;
+            }
 
-    const handleChange = (eventValue: string | null) => {
-        // console.log("Changing event selection to: ", eventValue);
-        // setFormData(null); // Clear the form data before setting new event
-        dispatch(setEvent(null)); // Clear the current selected event
+            // Set the selected event to selected = true
+            const { error: updateError2 } = await supabase
+                .from('events')
+                .update({ selected: true })
+                .eq('id', eventValue)
+                .eq('userId', session.user.id);
 
-        const event = events?.find(event => event.id === eventValue);
-        if (event) {
-            // dispatch(setSelectedEvent(event));
-            dispatch(setEvent(event));
-            setShowDropdown(false);
+            if (updateError2) {
+                console.log("Error updating selected event: ", updateError2);
+                return;
+            }
+
+            // Fetch updated events
+            await fetchEvents();
+            setShowDropdown(false); // Close dropdown after selecting an event
         }
     };
 
-    const handleButtonClick = () => {
+    const handleButtonClick = async () => {
+        await fetchEvents();
         setShowDropdown(true);
     };
 
@@ -89,20 +91,23 @@ const EventSelector: React.FC = () => {
                     <Text style={styles.buttonText}>Select Event</Text>
                 </TouchableOpacity>
             )}
+
             {showDropdown && (
                 <Modal visible={true} transparent={true}>
-                    <Pressable onPress={() => setShowDropdown(false)} style={styles.dropdownContainer}>
-                        <DropDownPicker
-                            open={open}
-                            value={value}
-                            items={items}
-                            setOpen={setOpen}
-                            setValue={setValue}
-                            setItems={setItems}
-                            onChangeValue={handleChange}
-                            placeholder="Select an event"
-                            containerStyle={styles.dropdown}
-                        />
+                    <Pressable style={styles.overlay} onPress={() => setShowDropdown(false)}>
+                        <View style={styles.dropdownContainer}>
+                            <DropDownPicker
+                                open={open}
+                                value={value}
+                                items={items}
+                                setOpen={setOpen}
+                                setValue={setValue}
+                                setItems={setItems}
+                                onChangeValue={handleChange}
+                                placeholder="Select an event"
+                                containerStyle={styles.dropdown}
+                            />
+                        </View>
                     </Pressable>
                 </Modal>
             )}
@@ -114,28 +119,32 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         backgroundColor: '#fff',
+        zIndex: 1, // Ensure this component is above others
     },
-    label: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: '#000',
+    overlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     dropdownContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
+        width: 300,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
     dropdown: {
-        height: 50,
-        width: 300,
-        marginBottom: 20,
+        width: '100%',
     },
     button: {
         backgroundColor: '#007BFF',
         padding: 15,
         borderRadius: 30,
         alignItems: 'center',
-        marginBottom: 20,
     },
     buttonText: {
         color: '#fff',

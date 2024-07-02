@@ -8,6 +8,7 @@ export interface Event {
     userId: string;
     location: string;
     description: string;
+    selected: boolean;
   }
 
   

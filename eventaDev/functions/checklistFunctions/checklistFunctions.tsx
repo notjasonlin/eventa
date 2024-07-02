@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 
 export const readChecklist = async (eventID: string): Promise<Checklist | null> => {
     let { data: checklist, error } = await supabase
-        .from('checklist')
+        .from('checklists')
         .select('*')
     
     if (error) {
@@ -17,17 +17,20 @@ export const readChecklist = async (eventID: string): Promise<Checklist | null> 
     }
 }
 
-export const createChecklist = async (checklistData: Checklist) => {
+export const createChecklist = async (checklistData: Checklist): Promise<Checklist | null> => {
     const { data, error } = await supabase
-    .from('checklist')
-    .insert(checklistData)
-
+      .from('checklists')
+      .insert(checklistData)
+      .select()
+      .single();
+  
     if (error) {
-        console.error("Error creating checklist:", error);
-    } else {
-        console.log("Checklist created succesfully")
+      console.error("Error creating checklist:", error);
+      return null;
     }
-}
+  
+    return data;
+  };
 
 export const setTasks = async (data: Task | null) => {
     

@@ -3,12 +3,12 @@ import { Text, TouchableOpacity, View, StyleSheet, FlatList, Alert } from "react
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { readBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
-import { Cost } from "../../../../interfaces/costInterface";
-import { addCost, deleteCost, readCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
+import { addCost, readCosts, readUnbookedCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
 import { setBudgetData, setCosts } from "../../../../store/redux/budget";
-import { fetchBookedVendorsNotInBudget, removeBookedVendor, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
+import { fetchBookedVendorsNotInBudget, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
 import { Link, useRouter } from "expo-router";
+import { AntDesign } from '@expo/vector-icons';
 
 const UserPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -32,7 +32,7 @@ const UserPage = () => {
       };
       fetchBudget();
     }
-  }, [event, event?.id]);
+  }, [event, event?.id, remoteTriggers[0], remoteTriggers[1], trigger]);
 
   useEffect(() => {
     const fetchCosts = async () => {
@@ -52,16 +52,19 @@ const UserPage = () => {
     const bookedVendorCosts = async () => {
       if (event && budgetData) {
         const vendorsToAdd = await fetchBookedVendorsNotInBudget(event.id);
-        if (vendorsToAdd) {
+        // const unbookedCosts = await readUnbookedCosts(budgetData.id);
+
+        if (vendorsToAdd) { // && unbookedCosts
           for (let i = 0, n = vendorsToAdd.length; i < n; i++) {
             const curr = vendorsToAdd[i];
-            addCost({
+
+            await addCost({
               budgetID: budgetData?.id,
               vendorType: curr.vendorType,
               vendorID: curr.vendorID,
               costInDollar: curr.cost,
               // Add other details once available
-            })
+            });
             await setBookedVendorInBudget(curr.vendorID, curr.eventID, true);
           }
           setTrigger(!trigger);
@@ -69,7 +72,7 @@ const UserPage = () => {
       }
     }
     bookedVendorCosts();
-  }, [budgetData, remoteTriggers[0]])
+  }, [remoteTriggers[0]])
 
   const createCosts = async (budgetID: string, costInDollar: number, vendorType: string) => {
     await addCost({
@@ -97,8 +100,14 @@ const UserPage = () => {
       {budgetData && (
         <>
           <View style={styles.budgetContainer}>
-            <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
-            <Text style={styles.budgetText}>{"Flexible: " + budgetData.flexible}</Text>
+            <View style={styles.budgetItem}>
+              <Text style={styles.budgetLabel}>Your Budget</Text>
+              <Text style={styles.budgetText}>{"$" + budgetData.totalCost}</Text>
+            </View>
+            <View style={styles.budgetItem}>
+              <Text style={styles.budgetLabel}>Remaining</Text>
+              <Text style={styles.budgetText}>{"$" + budgetData.remainder}</Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
             <Text style={styles.buttonText}>Create a cost</Text>
@@ -114,9 +123,16 @@ const UserPage = () => {
 
                   }} asChild>
                     <TouchableOpacity style={styles.costItem}>
-                      <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
-                      <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
-                      <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
+                      <View style={styles.costTextContainer}>
+                        <Text style={styles.costText}>{"Vendor: " + item.vendorType}</Text>
+                        <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
+                        <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
+                      </View>
+                      {!item.vendorID && (
+                        <View style={styles.costWarning}>
+                          <AntDesign name="warning" size={24} color="orange" />
+                        </View>
+                      )}
                     </TouchableOpacity>
                   </Link>
                 )}
@@ -127,8 +143,7 @@ const UserPage = () => {
           )}
           {showModal && <AddCostModal budget={budgetData} addCost={createCosts} hideModal={() => setShowModal(false)} />}
         </>
-      )
-      }
+      )}
     </View >
   );
 };
@@ -140,31 +155,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#343a40',
   },
   button: {
     backgroundColor: '#007bff',
-    padding: 10,
+    padding: 12,
     borderRadius: 5,
     marginVertical: 10,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '500',
   },
   budgetContainer: {
     marginVertical: 20,
-    padding: 10,
+    padding: 15,
     backgroundColor: '#e9ecef',
-    borderRadius: 5,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  budgetItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  budgetLabel: {
+    fontSize: 16,
+    color: '#6c757d',
   },
   budgetText: {
-    fontSize: 18,
-    marginVertical: 5,
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#495057',
   },
   costsContainer: {
     flex: 1,
@@ -174,17 +202,28 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   costItem: {
-    padding: 10,
+    padding: 15,
     backgroundColor: '#ffffff',
-    borderRadius: 5,
+    borderRadius: 8,
     marginVertical: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    elevation: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  costTextContainer: {
+    flex: 1,
+  },
+  costWarning: {
+    marginLeft: 10,
   },
   costText: {
     fontSize: 16,
+    color: '#343a40',
   },
 });
 

@@ -10,7 +10,7 @@ import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
 import { costAddTrigger } from '../../../store/redux/budget';
-import { readBudget } from '../../../functions/budgetFunctions/budgetFunctions';
+import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
@@ -71,22 +71,34 @@ const SingleVendor = () => {
         if (!budgetData) {
             budgetData = await readBudget(event.id);
         }
-        const totalCost = budgetData?.totalCost;
+
+        let remainder = 0;
+        if (budgetData) {
+            remainder = budgetData.remainder;
+        }
 
         const book = async () => {
             if (vendor?.id !== undefined) {
                 const completeBook = async () => {
-                    await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost);
-                    dispatch(costAddTrigger());
-                    setShowModal(false);
+                    if (budgetData) {
+                        // console.log("START");
+                        // console.log(budgetData)
+                        // console.log(vendor.id)
+                        // console.log("END");
+                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost);
+                        await updateBudget(budgetData.id, remainder, vendor.cost);
+                        dispatch(costAddTrigger());
+                        setShowModal(false);
+                    }
+
                 }
 
                 const booking = await selectBookedVendor(vendor.id, event.id, vendor.vendorType)
                 if (booking && booking.length > 0) {
                     Alert.alert(`Already booked ${vendor?.name} for ${event.eventName}`)
-                } else if (!totalCost) {
+                } else if (!remainder) {
                     Alert.alert("No Budget Set", "Must set your budget before booking vendor"); // Navigate to budget setting page
-                } else if (vendor.cost > totalCost) {
+                } else if (vendor.cost > remainder) {
                     Alert.alert("Going over budget", "Are you sure you want to add this vendor as a cost?", [ // Navigate to budget setting page
                         {
                             text: "Book",

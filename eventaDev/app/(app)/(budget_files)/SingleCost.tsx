@@ -7,9 +7,10 @@ import { GenericVendor } from "../../../interfaces/genericVendorInterface";
 import { Cost } from "../../../interfaces/costInterface";
 import { deleteCost, readCost } from "../../../functions/budgetFunctions/costFunctions";
 import { removeBookedVendor } from "../../../functions/vendorFunctions/bookedVendorFunctions";
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { costDeleteTrigger } from "../../../store/redux/budget";
 import UpdateCostModal from "../../../components/budget/UpdateCostModal";
+import { updateBudget } from "../../../functions/budgetFunctions/budgetFunctions";
 
 const SingleCost = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -23,7 +24,7 @@ const SingleCost = () => {
 
     useEffect(() => {
         const fetchCost = async () => {
-            if (budgetData && (typeof(costID) === "string")) {
+            if (budgetData && (typeof (costID) === "string")) {
                 const data = await readCost(budgetData?.id, costID)
                 setCost(data);
             }
@@ -32,7 +33,7 @@ const SingleCost = () => {
     }, [remoteTriggers[1], remoteTriggers[2]]) // for deletes and updates
 
     useEffect(() => {
-        if (cost) {
+        if (cost && cost.vendorID) {
             selectVendorByTypeAndID(cost.vendorType, cost.vendorID)
                 .then((vendorData) => {
                     if (vendorData) {
@@ -50,7 +51,10 @@ const SingleCost = () => {
         const confirmRemove = async () => {
             if (cost && budgetData) {
                 await deleteCost(cost.id);
-                await removeBookedVendor(cost.vendorID, budgetData.eventId);
+                if (cost.vendorID) {
+                    await removeBookedVendor(cost.vendorID, budgetData.eventId);
+                }
+                await updateBudget(budgetData.id, budgetData.remainder, (-cost.costInDollar));
                 dispatch(costDeleteTrigger());
                 router.back();
             }
@@ -70,6 +74,16 @@ const SingleCost = () => {
 
     return (
         <>
+            {cost && !vendor &&
+                <View>
+                    <Text>Book {cost.vendorType}</Text>
+                    <Link href={{ pathname: "(vendor_files)/VendorTypePage", params: { type: cost.vendorType, title: cost.vendorType.charAt(0).toUpperCase() + cost.vendorType.slice(1) } }} asChild>
+                        <TouchableOpacity>
+                            <Text>Book!</Text>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
+            }
             {cost && vendor &&
                 <View style={styles.container}>
                     <Text style={styles.title}>Party Cost</Text>

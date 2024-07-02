@@ -1,7 +1,7 @@
 import { Modal, Pressable, View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { Cost } from "../../interfaces/costInterface";
 import { Budget } from "../../interfaces/budgetInterface";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type AddCostModalProps = {
     addCost: (budgetID: string, costInDollar: number, vendorType: string) => Promise<void>
@@ -10,11 +10,26 @@ type AddCostModalProps = {
 }
 
 const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
-    const [costInDollar, setCostInDollar] = useState<number | null>(0);
-    const [vendorType, setVendorType] = useState<string | null>("");
+    const [costInDollar, setCostInDollar] = useState<number>(0);
+    const [vendorSelector, setVendorSelector] = useState<boolean[]>([false, false, false, false, false, false]);
+    const vendors = ["venues", "catering", "photographers", "entertainment", "decoration", "other"];
+
+    const handleVendorSelection = (index: number) => {
+        const newVendorSelection = vendorSelector.map((_, i) => i === index);
+        console.log("New: ", newVendorSelection);
+        setVendorSelector(newVendorSelection);
+    };
 
     const add = async () => {
-        if (costInDollar && vendorType) {
+        let vendorType = "";
+        vendorSelector.map((select, i) => {
+            if (select) {
+                console.log(i);
+                vendorType = vendors[i];
+            }
+        })
+
+        if (vendorType) {
             await addCost(budget.id, costInDollar, vendorType);
             hideModal();
         } else {
@@ -27,19 +42,40 @@ const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
             <Pressable onPress={hideModal} style={styles.modalBackDrop}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Add Cost</Text>
-                    <TextInput
+                    <Text>Select Vendor</Text>
+                    <View style={styles.row}>
+                        {['Venue', 'Catering', 'Photographer'].map((vendor, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => handleVendorSelection(index)}
+                                style={[styles.button, vendorSelector[index] && styles.selectedButton]}
+                            >
+                                <Text style={[styles.buttonText, vendorSelector[index] && styles.selectedButtonText]}>
+                                    {vendor}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    <View style={styles.row}>
+                        {['Entertainment', 'Decoration', 'Other'].map((vendor, index) => (
+                            <TouchableOpacity
+                                key={index + 3}
+                                onPress={() => handleVendorSelection(index + 3)}
+                                style={[styles.button, vendorSelector[index + 3] && styles.selectedButton]}
+                            >
+                                <Text style={[styles.buttonText, vendorSelector[index + 3] && styles.selectedButtonText]}>
+                                    {vendor}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                    {vendorSelector[5] && <TextInput
                         style={styles.input}
                         keyboardType="number-pad"
                         onChangeText={(text) => setCostInDollar(Number(text))}
                         placeholder="Cost in Dollars"
                         placeholderTextColor="#888"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={(text) => setVendorType(text)}
-                        placeholder="Vendor Type"
-                        placeholderTextColor="#888"
-                    />
+                    />}
                     <TouchableOpacity onPress={add} style={styles.addButton}>
                         <Text style={styles.addButtonText}>Add Cost</Text>
                     </TouchableOpacity>
@@ -85,11 +121,36 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         fontSize: 16,
     },
-    addButton: {
-        backgroundColor: "#007bff",
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    button: {
         padding: 10,
+        borderWidth: 1,
+        borderColor: '#888',
+        borderRadius: 5,
+        width: '30%',
+        alignItems: 'center',
+    },
+    selectedButton: {
+        backgroundColor: '#007bff',
+        borderColor: '#007bff',
+    },
+    buttonText: {
+        color: '#000',
+    },
+    selectedButtonText: {
+        color: '#fff',
+    },
+    addButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: "#007bff",
         borderRadius: 5,
         alignItems: 'center',
+        width: '100%',
     },
     addButtonText: {
         color: "#fff",

@@ -4,4 +4,5 @@ export interface Budget {
     totalCost: number,
     flexible: boolean,
     maxFlex: number,
+    remainder: number,
 }

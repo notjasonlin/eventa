@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/redux/store";
 import { useState } from "react";
 import { createBudget, readBudget } from "../../../functions/budgetFunctions/budgetFunctions";
-import { setBudgetData } from "../../../store/redux/budget";
+import { costAddTrigger, setBudgetData } from "../../../store/redux/budget";
 import { useRouter } from "expo-router";
 import uuid from 'react-native-uuid'; 
+import { addCost } from "../../../functions/budgetFunctions/costFunctions";
 
 const BudgetForm = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -22,9 +23,16 @@ const BudgetForm = () => {
             totalCost: totalBudget,
             flexible: options[1],
             maxFlex: 0,
+            remainder: totalBudget
           });
           const data = await readBudget(event.id);
           dispatch(setBudgetData(data));
+          await addCost({budgetID: data?.id, vendorType: "venues"})
+          await addCost({budgetID: data?.id, vendorType: "catering"})
+          await addCost({budgetID: data?.id, vendorType: "photographers"})
+          await addCost({budgetID: data?.id, vendorType: "entertainment"})
+          await addCost({budgetID: data?.id, vendorType: "decoration"})
+          dispatch(costAddTrigger());
           router.back();
         } else {
           console.error("No selected event");

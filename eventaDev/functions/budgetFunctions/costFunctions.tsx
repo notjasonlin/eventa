@@ -1,6 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import { Cost } from "../../interfaces/costInterface";
-import uuid from 'react-native-uuid'; 
+import uuid from 'react-native-uuid';
 
 export const readCosts = async (budgetID: string): Promise<{
     costs: Cost[], venues: Cost[], catering: Cost[],
@@ -9,7 +9,7 @@ export const readCosts = async (budgetID: string): Promise<{
     let { data: costs, error } = await supabase
         .from('costs')
         .select('*')
-        .eq('budgetID', budgetID);
+        .eq('budgetID', budgetID)
 
     if (error) {
         console.error(error);
@@ -40,7 +40,7 @@ export const readCosts = async (budgetID: string): Promise<{
             }
         });
 
-        return {costs, venues, catering, photographers, entertainment, decoration, other}
+        return { costs, venues, catering, photographers, entertainment, decoration, other }
     }
 }
 
@@ -62,9 +62,6 @@ export const readCost = async (budgetID: string, costID: string): Promise<Cost |
 }
 
 export const addCost = async (costData: Record<string, any>) => {
-    console.log("Data: ");
-    console.log(costData);
-
     const defaultValues = {
         id: uuid.v4().toString(),
         budgetID: 0,
@@ -95,14 +92,65 @@ export const addCost = async (costData: Record<string, any>) => {
         vendorID: mergedData.vendorID,
     };
 
-    const { data, error } = await supabase
-        .from('costs')
-        .insert([insertData]);
+    console.log(insertData);
 
-    if (error) {
-        throw error;
+    try {
+        const { data, error } = await supabase.from('costs').insert([insertData]);
+
+        if (error) {
+            console.error('Error inserting data:', error);
+            throw error;
+        }
+
+        console.log('Data inserted successfully:', data);
+    } catch (err) {
+        console.error('Caught error:', err);
+        throw err;
     }
 };
+
+export const readUnbookedCosts = async (budgetID: string): Promise<{
+    costs: Cost[], venues: Cost[], catering: Cost[],
+    photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
+} | null> => {
+    let { data: costs, error } = await supabase
+        .from('costs')
+        .select('*')
+        .eq('budgetID', budgetID)
+        .eq('vendorID', null)
+
+    if (error) {
+        console.error(error);
+        return null;
+    } else if (!costs) {
+        return null;
+    } else {
+        const venues: Cost[] = [];
+        const catering: Cost[] = [];
+        const photographers: Cost[] = [];
+        const entertainment: Cost[] = [];
+        const decoration: Cost[] = [];
+        const other: Cost[] = [];
+
+        costs.filter((cost: Cost) => {
+            if (cost.vendorType === "Venue") {
+                venues.push(cost);
+            } else if (cost.vendorType === "Catering") {
+                catering.push(cost);
+            } else if (cost.vendorType === "Photographers") {
+                photographers.push(cost);
+            } else if (cost.vendorType === "Entertainment") {
+                entertainment.push(cost);
+            } else if (cost.vendorType === "Decoration") {
+                decoration.push(cost);
+            } else {
+                other.push(cost);
+            }
+        });
+
+        return { costs, venues, catering, photographers, entertainment, decoration, other }
+    }
+}
 
 export const updateCost = async (budgetID: string, costID: string, column: Record<string, any>) => { // change budget and cost ID to string when uuid
     const { data, error } = await supabase

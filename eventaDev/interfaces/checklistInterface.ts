@@ -1,5 +1,5 @@
 export interface Checklist {
-    eventType: string;
+    eventType: any;
     eventId: string,
     id: number,
 }

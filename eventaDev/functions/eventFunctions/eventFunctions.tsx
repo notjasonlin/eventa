@@ -25,6 +25,22 @@ export const fetchEvents = async (userId: string): Promise<{ events: Event[], pa
   return { events, pastEvents, upcomingEvents };
 };
 
+export const getEventById = async (id: string) => {
+  const { data, error } = await supabase
+    .from('events')
+    .select()
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error("Error getting event by eventID:", error);
+    return null;
+  }
+  return data;
+};
+
+
+
 export const deleteEvent = async (id: string) => {
     const { error } = await supabase
         .from('events')

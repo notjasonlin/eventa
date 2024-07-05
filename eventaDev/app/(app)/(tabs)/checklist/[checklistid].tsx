@@ -22,9 +22,11 @@ const UserPage = () => {
     const fetchChecklist = async () => {
       setChecklistData(null);
       setTasks([]);
+
       if (event?.id) {
         console.log("Fetching checklist for event ID:", event.id);
         let checklist = await readChecklist(event.id);
+
         if (!checklist) {
           console.log("No checklist found, creating new checklist...");
           checklist = await createChecklist({ eventId: event.id, eventType: event.eventType, id: Math.floor(Math.random() * 1000) });
@@ -41,7 +43,7 @@ const UserPage = () => {
     };
 
     fetchChecklist();
-  }, [event]);
+  }, [event, event?.id]);
 
   const fetchTasks = async (checklistId: number) => {
     console.log("Fetching tasks for checklist ID:", checklistId);

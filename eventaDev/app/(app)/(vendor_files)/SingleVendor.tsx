@@ -11,6 +11,9 @@ import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
 import { costAddTrigger } from '../../../store/redux/budget';
 import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLayoutEffect } from 'react';
+import event from '../../../store/redux/event';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
@@ -21,8 +24,16 @@ const SingleVendor = () => {
     const router = useRouter();
     const [showModal, setShowModal] = useState<boolean>(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
+    const { title } = useLocalSearchParams();
+    const navigation = useNavigation();
 
     const DEFAULT_IMAGE = { uri: `https://meehvdwhjxszsdgpeljs.supabase.co/storage/v1/object/public/marketplace/venues/default.png` };
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            title: vendor?.name || title || "Vendor",
+        });
+    }, [navigation]);
 
     useEffect(() => {
         if (!upcomingEvents) {

@@ -7,6 +7,7 @@ import { Checklist } from "../../../../interfaces/checklistInterface";
 import { createChecklist, readChecklist } from "../../../../functions/checklistFunctions/checklistFunctions";
 import { readTasks, setEventTypeTasks } from "../../../../functions/checklistFunctions/taskFunctions";
 import { supabase } from "../../../../lib/supabase";
+import { Link } from "expo-router";
 
 interface CheckboxProps {
   task: Task;
@@ -41,7 +42,7 @@ const UserPage = () => {
         }
         setChecklistData(checklist);
         if (checklist) {
-          fetchTasks(checklist.id);
+          fetchTasks(checklist.id, event.created_at, event.eventDate);
         }
       }
     };
@@ -49,27 +50,61 @@ const UserPage = () => {
     fetchChecklist();
   }, [event, event?.id]);
 
-  const fetchTasks = async (checklistId: number) => {
+  const fetchTasks = async (checklistId: number, createdAt: string, eventDate: string) => {
     console.log("Fetching tasks for checklist ID:", checklistId);
     const fetchedTasks = await readTasks(checklistId);
     const sortedTasks = (fetchedTasks || []).sort((a, b) => a.order - b.order);
     const todoTasks = sortedTasks.filter(task => !task.isCompleted);
     const completedTasks = sortedTasks.filter(task => task.isCompleted);
-    const formattedTasks: TaskData[] = [
-      { type: 'header', data: 'Todo' as const },
-      ...todoTasks.map(task => ({ type: 'task' as const, data: task })),
+    const formattedTasks = distributeTasks(todoTasks, createdAt, eventDate);
+    const formattedData: TaskData[] = [
+      ...formattedTasks,
       { type: 'header', data: 'Completed' as const },
       ...completedTasks.map(task => ({ type: 'task' as const, data: task }))
     ];
-    setTasks(formattedTasks);
-    console.log("Fetched tasks:", formattedTasks);
+    setTasks(formattedData);
+    if (formattedData) {
+      console.log("Fetched tasks successfully!");
+    }
+  };
+
+  const distributeTasks = (tasks: Task[], createdAt: string, eventDate: string) => {
+    const start = new Date(createdAt);
+    const end = new Date(eventDate);
+
+    const totalMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+    const totalTasks = tasks.length;
+    const tasksPerMonth = Math.floor(totalTasks / totalMonths);
+    const remainingTasks = totalTasks % totalMonths;
+
+    const distributedTasks: TaskData[] = [];
+    let taskIndex = 0;
+
+    for (let i = 0; i < totalMonths; i++) {
+      const currentMonth = new Date(start.getFullYear(), start.getMonth() + i);
+      const monthName = currentMonth.toLocaleString('default', { month: 'long' });
+      const year = currentMonth.getFullYear();
+      const header = `${monthName} ${year}`;
+
+      distributedTasks.push({ type: 'header', data: header });
+
+      for (let j = 0; j < tasksPerMonth && taskIndex < totalTasks; j++) {
+        distributedTasks.push({ type: 'task', data: tasks[taskIndex++] });
+      }
+      // Add remaining tasks one per month
+      if (i < remainingTasks && taskIndex < totalTasks) {
+        distributedTasks.push({ type: 'task', data: tasks[taskIndex++] });
+      }
+    }
+
+    return distributedTasks;
   };
 
   const handleToggle = async (task: Task) => {
     const newStatus = !task.isCompleted;
     await updateTaskCompletion(task.id, newStatus); // Update task completion in the database
-    if (checklistData) {
-      fetchTasks(checklistData.id); // Refresh the task list
+    if (checklistData && event) {
+      fetchTasks(checklistData.id, event.created_at, event.eventDate); // Refresh the task list
     }
   };
 
@@ -90,7 +125,9 @@ const UserPage = () => {
             return <Text style={styles.header}>{item.data}</Text>;
           } else {
             const task = item.data;
-            return <TaskCheckbox task={task} onToggle={() => handleToggle(task)} />;
+            return (
+              <TaskCheckbox task={task} onToggle={() => handleToggle(task)} />
+            );
           }
         }}
         keyExtractor={(item, index) => index.toString()}
@@ -106,18 +143,27 @@ const TaskCheckbox: React.FC<CheckboxProps> = ({ task, onToggle }) => {
     setIsChecked(task.isCompleted);
   }, [task]);
 
-  const handleToggle = async () => {
+  const handleCheckboxToggle = async () => {
     await onToggle();
     setIsChecked(!isChecked);
   };
 
   return (
-    <TouchableOpacity style={styles.taskContainer} onPress={handleToggle}>
-      <View style={[styles.checkbox, isChecked && styles.checkedCheckbox]}>
-        {isChecked && <Text style={styles.checkmark}>✓</Text>}
-      </View>
-      <Text style={[styles.taskText, isChecked && styles.completedTaskText]}>{task.name}</Text>
-    </TouchableOpacity>
+    <View style={styles.taskContainer}>
+      <TouchableOpacity style={styles.checkboxContainer} onPress={handleCheckboxToggle}>
+        <View style={[styles.checkbox, isChecked && styles.checkedCheckbox]}>
+          {isChecked && <Text style={styles.checkmark}>✓</Text>}
+        </View>
+      </TouchableOpacity>
+      <Link href={{
+        pathname: "/(checklist_files)/singleTask",
+        params: { taskID: task.id }
+      }} asChild>
+        <TouchableOpacity style={styles.taskTextContainer}>
+          <Text style={[styles.taskText, isChecked && styles.completedTaskText]}>{task.name}</Text>
+        </TouchableOpacity>
+      </Link>
+    </View>
   );
 };
 
@@ -155,6 +201,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  checkboxContainer: {
+    marginRight: 10,
+  },
   checkbox: {
     width: 20,
     height: 20,
@@ -170,8 +219,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  taskTextContainer: {
+    flex: 1,
+  },
   taskText: {
-    marginLeft: 10,
     fontSize: 16,
   },
   completedTaskText: {

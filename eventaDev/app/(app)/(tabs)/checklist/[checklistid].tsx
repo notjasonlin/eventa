@@ -13,10 +13,14 @@ interface CheckboxProps {
   onToggle: () => void;
 }
 
+type TaskData = 
+  | { type: 'header'; data: string }
+  | { type: 'task'; data: Task };
+
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
   const [checklistData, setChecklistData] = useState<Checklist | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskData[]>([]);
 
   useEffect(() => {
     const fetchChecklist = async () => {
@@ -48,18 +52,26 @@ const UserPage = () => {
   const fetchTasks = async (checklistId: number) => {
     console.log("Fetching tasks for checklist ID:", checklistId);
     const fetchedTasks = await readTasks(checklistId);
-    setTasks(fetchedTasks || []);
-    console.log("Fetched tasks:", fetchedTasks);
+    const sortedTasks = (fetchedTasks || []).sort((a, b) => a.order - b.order);
+    const todoTasks = sortedTasks.filter(task => !task.isCompleted);
+    const completedTasks = sortedTasks.filter(task => task.isCompleted);
+    const formattedTasks: TaskData[] = [
+      { type: 'header', data: 'Todo' as const },
+      ...todoTasks.map(task => ({ type: 'task' as const, data: task })),
+      { type: 'header', data: 'Completed' as const },
+      ...completedTasks.map(task => ({ type: 'task' as const, data: task }))
+    ];
+    setTasks(formattedTasks);
+    console.log("Fetched tasks:", formattedTasks);
   };
 
-  const handleToggle = () => {
+  const handleToggle = async (task: Task) => {
+    const newStatus = !task.isCompleted;
+    await updateTaskCompletion(task.id, newStatus); // Update task completion in the database
     if (checklistData) {
-      fetchTasks(checklistData.id);
+      fetchTasks(checklistData.id); // Refresh the task list
     }
   };
-
-  const todoTasks = tasks.filter(task => !task.isCompleted);
-  const completedTasks = tasks.filter(task => task.isCompleted);
 
   if (!event) {
     return (
@@ -71,21 +83,17 @@ const UserPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Todo</Text>
       <FlatList
-        data={todoTasks}
-        renderItem={({ item }) => (
-          <TaskCheckbox task={item} onToggle={handleToggle} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
-      <Text style={styles.header}>Completed</Text>
-      <FlatList
-        data={completedTasks}
-        renderItem={({ item }) => (
-          <TaskCheckbox task={item} onToggle={handleToggle} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
+        data={tasks}
+        renderItem={({ item }) => {
+          if (item.type === 'header') {
+            return <Text style={styles.header}>{item.data}</Text>;
+          } else {
+            const task = item.data;
+            return <TaskCheckbox task={task} onToggle={() => handleToggle(task)} />;
+          }
+        }}
+        keyExtractor={(item, index) => index.toString()}
       />
     </View>
   );
@@ -94,11 +102,13 @@ const UserPage = () => {
 const TaskCheckbox: React.FC<CheckboxProps> = ({ task, onToggle }) => {
   const [isChecked, setIsChecked] = useState(task.isCompleted);
 
+  useEffect(() => {
+    setIsChecked(task.isCompleted);
+  }, [task]);
+
   const handleToggle = async () => {
-    const newStatus = !isChecked;
-    setIsChecked(newStatus);
-    await updateTaskCompletion(task.id, newStatus); // Update task completion in the database
-    onToggle(); // Callback to refresh the task list
+    await onToggle();
+    setIsChecked(!isChecked);
   };
 
   return (
@@ -134,6 +144,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 20,
+    backgroundColor: '#fff', // Ensure the background color of header is white to avoid overlapping text
+    paddingVertical: 5, // Add some padding for better spacing
+    paddingHorizontal: 10,
   },
   taskContainer: {
     flexDirection: 'row',

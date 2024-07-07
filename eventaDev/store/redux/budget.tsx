@@ -11,6 +11,10 @@ interface BudgetSystemState {
     entertainmentCosts: Cost[] | null,
     decorationCosts: Cost[] | null,
     costTriggers: boolean[],
+    costBookPackage: {
+        cost: Cost | null,
+        eventID: string | null,
+    },
 }
 
 const initialState: BudgetSystemState = {
@@ -22,6 +26,10 @@ const initialState: BudgetSystemState = {
     entertainmentCosts: null,
     decorationCosts: null,
     costTriggers: [false, false, false], // use trigger for changes to following in this order [add, delete, update]
+    costBookPackage: {
+        cost: null,
+        eventID: null,
+    },
 }
 
 const budgetSlice = createSlice({
@@ -58,9 +66,15 @@ const budgetSlice = createSlice({
         costUpdateTrigger(state) {
             state.costTriggers[2] = !state.costTriggers[2];
         },
+        setPackageCost(state, action: PayloadAction<Cost | null>) {
+            state.costBookPackage.cost = action.payload;
+        },
+        setPackageEventID(state, action: PayloadAction<string | null>) {
+            state.costBookPackage.eventID = action.payload;
+        },
     }
 })
 
-export const { setBudgetData, setCosts, setVenueCosts, setCateringCosts, setPhotographerCosts, 
-    setEntertainmentCosts, setDecorationCosts, costAddTrigger, costDeleteTrigger, costUpdateTrigger} = budgetSlice.actions;
+export const { setBudgetData, setCosts, setVenueCosts, setCateringCosts, setPhotographerCosts, setEntertainmentCosts,
+    setDecorationCosts, costAddTrigger, costDeleteTrigger, costUpdateTrigger, setPackageCost, setPackageEventID} = budgetSlice.actions;
 export default budgetSlice.reducer;

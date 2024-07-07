@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, StyleSheet, FlatList, Alert } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../../store/redux/store";
-import { readBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
-import { addCost, readCosts, readUnbookedCosts, updateCost } from "../../../../functions/budgetFunctions/costFunctions";
+import { readBudget, updateBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
+import { addCost, readCosts } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
 import { setBudgetData, setCosts } from "../../../../store/redux/budget";
-import { fetchBookedVendorsNotInBudget, setBookedVendorInBudget } from "../../../../functions/vendorFunctions/bookedVendorFunctions";
 import { Link, useRouter } from "expo-router";
 import { AntDesign } from '@expo/vector-icons';
 
@@ -32,7 +31,7 @@ const UserPage = () => {
       };
       fetchBudget();
     }
-  }, [event, event?.id, remoteTriggers[0], remoteTriggers[1], trigger]);
+  }, [event, event?.id, remoteTriggers[1], remoteTriggers[2], trigger]);
 
   useEffect(() => {
     const fetchCosts = async () => {
@@ -45,41 +44,17 @@ const UserPage = () => {
       }
     }
     fetchCosts();
-  }, [budgetData, trigger, remoteTriggers[1], remoteTriggers[2]]);
+  }, [budgetData, trigger, remoteTriggers[0], remoteTriggers[1], remoteTriggers[2]]);
 
-
-  useEffect(() => {
-    const bookedVendorCosts = async () => {
-      if (event && budgetData) {
-        const vendorsToAdd = await fetchBookedVendorsNotInBudget(event.id);
-        // const unbookedCosts = await readUnbookedCosts(budgetData.id);
-
-        if (vendorsToAdd) { // && unbookedCosts
-          for (let i = 0, n = vendorsToAdd.length; i < n; i++) {
-            const curr = vendorsToAdd[i];
-
-            await addCost({
-              budgetID: budgetData?.id,
-              vendorType: curr.vendorType,
-              vendorID: curr.vendorID,
-              costInDollar: curr.cost,
-              // Add other details once available
-            });
-            await setBookedVendorInBudget(curr.vendorID, curr.eventID, true);
-          }
-          setTrigger(!trigger);
-        }
-      }
-    }
-    bookedVendorCosts();
-  }, [remoteTriggers[0]])
-
-  const createCosts = async (budgetID: string, costInDollar: number, vendorType: string) => {
+  const createCosts = async (budgetID: string, remainder: number, costInDollar: number, vendorType: string) => {
     await addCost({
       budgetID: budgetID,
       vendorType: vendorType,
       costInDollar: costInDollar,
     });
+    if (costInDollar !== 0) {
+      await updateBudget(budgetID, remainder, (costInDollar));
+  }
     setTrigger(!trigger);
   }
 
@@ -128,7 +103,7 @@ const UserPage = () => {
                         <Text style={styles.costText}>{"Predicted Cost: " + item.predictedCost}</Text>
                         <Text style={styles.costText}>{"Actual Cost: " + item.costInDollar}</Text>
                       </View>
-                      {!item.vendorID && (
+                      {!item.vendorID && item.vendorType !== "other" && (
                         <View style={styles.costWarning}>
                           <AntDesign name="warning" size={24} color="orange" />
                         </View>

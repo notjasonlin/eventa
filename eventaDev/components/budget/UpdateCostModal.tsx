@@ -7,33 +7,34 @@ import { updateCost } from "../../functions/budgetFunctions/costFunctions";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/redux/store";
 import { costUpdateTrigger } from "../../store/redux/budget";
+import { updateBudget } from "../../functions/budgetFunctions/budgetFunctions";
 
 type AddCostModalProps = {
     hideModal: () => void
     budget: Budget
     cost: Cost
-    vendor?: GenericVendor
+    vendor: GenericVendor | null
 }
 
 const UpdateCostModal = ({ hideModal, budget, cost, vendor }: AddCostModalProps) => {
     const dispatch = useDispatch<AppDispatch>();
-    const [costInDollar, setCostInDollar] = useState<number | null>(0);
-    const [vendorType, setVendorType] = useState<string | null>("");
+    const [costInDollar, setCostInDollar] = useState<number>(0);
+    const [predictedCost, setPredictedCost] = useState<number>(0);
 
     const update = async () => {
-        console.log("UPDATE")
-        console.log(costInDollar)
-        console.log(vendorType)
-
-        if (costInDollar) { // && (vendorType || !vendor)
+        if (costInDollar) {
             let changes: Record<string, any> = {};
-            // if (!vendor) {
-            //     changes.vendorType = vendorType;
-            // }
-            changes.costInDollar = costInDollar;
+            if (!vendor) {
+                changes.costInDollar = costInDollar;
+            }
+            changes.predictedCost = predictedCost;
 
             console.log(changes);
             await updateCost(budget.id, cost.id, changes);
+            if (costInDollar !== 0) {
+                const sub = costInDollar - cost.costInDollar;
+                await updateBudget(budget.id, budget.remainder, sub);
+            }
             dispatch(costUpdateTrigger());
             hideModal();
         }
@@ -47,16 +48,20 @@ const UpdateCostModal = ({ hideModal, budget, cost, vendor }: AddCostModalProps)
                     <TextInput
                         style={styles.input}
                         keyboardType="number-pad"
-                        onChangeText={(text) => setCostInDollar(Number(text))}
-                        placeholder="Cost in Dollars"
+                        onChangeText={(text) => setPredictedCost(Number(text))}
+                        placeholder="Predicted Cost in Dollars"
                         placeholderTextColor="#888"
                     />
-                    {!vendor && <TextInput
-                        style={styles.input}
-                        onChangeText={(text) => setVendorType(text)}
-                        placeholder="Vendor Type"
-                        placeholderTextColor="#888"
-                    />}
+                    {!vendor &&
+                        <>
+                            <TextInput
+                                style={styles.input}
+                                keyboardType="number-pad"
+                                onChangeText={(text) => setCostInDollar(Number(text))}
+                                placeholder="Total Cost in Dollars"
+                                placeholderTextColor="#888"
+                            />
+                        </>}
                     <TouchableOpacity onPress={update} style={styles.addButton}>
                         <Text style={styles.addButtonText}>Update Cost</Text>
                     </TouchableOpacity>

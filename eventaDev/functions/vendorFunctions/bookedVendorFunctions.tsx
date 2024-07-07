@@ -5,7 +5,7 @@ export const bookVendor = async (vendorID: string, eventID: string, vendorType: 
     const { data, error } = await supabase
         .from('bookedVendors')
         .insert([
-            { vendorID: vendorID, eventID: eventID, vendorType: vendorType, inBudget: false, cost: cost },
+            { vendorID: vendorID, eventID: eventID, vendorType: vendorType, inBudget: true, cost: cost },
         ])
 
     if (error) {

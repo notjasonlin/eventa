@@ -7,6 +7,7 @@ import { costAddTrigger, setBudgetData } from "../../../store/redux/budget";
 import { useRouter } from "expo-router";
 import uuid from 'react-native-uuid'; 
 import { addCost } from "../../../functions/budgetFunctions/costFunctions";
+import { BUDGET_ESTIMATES } from "../../../constants/budgetEstimates";
 
 const BudgetForm = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -27,11 +28,34 @@ const BudgetForm = () => {
           });
           const data = await readBudget(event.id);
           dispatch(setBudgetData(data));
-          await addCost({budgetID: data?.id, vendorType: "venues"})
-          await addCost({budgetID: data?.id, vendorType: "catering"})
-          await addCost({budgetID: data?.id, vendorType: "photographers"})
-          await addCost({budgetID: data?.id, vendorType: "entertainment"})
-          await addCost({budgetID: data?.id, vendorType: "decoration"})
+          await Promise.all([
+            addCost({
+              budgetID: data?.id, 
+              vendorType: "venues", 
+              predictedCost: parseFloat((BUDGET_ESTIMATES.VENUES * totalBudget).toFixed(2))
+            }),
+            addCost({
+              budgetID: data?.id, 
+              vendorType: "catering", 
+              predictedCost: parseFloat((BUDGET_ESTIMATES.CATERING * totalBudget).toFixed(2))
+            }),
+            addCost({
+              budgetID: data?.id, 
+              vendorType: "photographers", 
+              predictedCost: parseFloat((BUDGET_ESTIMATES.PHOTOGRAPHERS * totalBudget).toFixed(2))
+            }),
+            addCost({
+              budgetID: data?.id, 
+              vendorType: "entertainment", 
+              predictedCost: parseFloat((BUDGET_ESTIMATES.ENTERTAINMENT * totalBudget).toFixed(2))
+            }),
+            addCost({
+              budgetID: data?.id, 
+              vendorType: "decoration", 
+              predictedCost: parseFloat((BUDGET_ESTIMATES.DECORATION * totalBudget).toFixed(2))
+            })
+          ]);
+          
           dispatch(costAddTrigger());
           router.back();
         } else {

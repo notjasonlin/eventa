@@ -109,15 +109,12 @@ export const addCost = async (costData: Record<string, any>) => {
     }
 };
 
-export const readUnbookedCosts = async (budgetID: string): Promise<{
-    costs: Cost[], venues: Cost[], catering: Cost[],
-    photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
-} | null> => {
+export const readUnbookedCosts = async (budgetID: string): Promise<Cost[] | null> => {
     let { data: costs, error } = await supabase
         .from('costs')
         .select('*')
         .eq('budgetID', budgetID)
-        .eq('vendorID', null)
+        .is('vendorID', null);
 
     if (error) {
         console.error(error);
@@ -125,30 +122,7 @@ export const readUnbookedCosts = async (budgetID: string): Promise<{
     } else if (!costs) {
         return null;
     } else {
-        const venues: Cost[] = [];
-        const catering: Cost[] = [];
-        const photographers: Cost[] = [];
-        const entertainment: Cost[] = [];
-        const decoration: Cost[] = [];
-        const other: Cost[] = [];
-
-        costs.filter((cost: Cost) => {
-            if (cost.vendorType === "Venue") {
-                venues.push(cost);
-            } else if (cost.vendorType === "Catering") {
-                catering.push(cost);
-            } else if (cost.vendorType === "Photographers") {
-                photographers.push(cost);
-            } else if (cost.vendorType === "Entertainment") {
-                entertainment.push(cost);
-            } else if (cost.vendorType === "Decoration") {
-                decoration.push(cost);
-            } else {
-                other.push(cost);
-            }
-        });
-
-        return { costs, venues, catering, photographers, entertainment, decoration, other }
+        return costs;
     }
 }
 

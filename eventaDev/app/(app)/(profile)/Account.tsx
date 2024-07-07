@@ -6,14 +6,21 @@ import { supabase } from '../../../lib/supabase'
 import { useDispatch } from "react-redux";
 import { AppDispatch } from '../../../store/redux/store'
 import { signOut } from "../../../store/redux/auth";
-
-
+import { useLayoutEffect } from 'react'
+import { useNavigation } from 'expo-router'
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const dispatch = useDispatch<AppDispatch>();
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+        title: "Profile",
+    });
+}, [navigation]);
 
   useEffect(() => {
     if (session) getProfile()

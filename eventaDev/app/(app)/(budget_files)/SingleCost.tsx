@@ -8,7 +8,7 @@ import { Cost } from "../../../interfaces/costInterface";
 import { deleteCost, readCost } from "../../../functions/budgetFunctions/costFunctions";
 import { removeBookedVendor } from "../../../functions/vendorFunctions/bookedVendorFunctions";
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
-import { costDeleteTrigger } from "../../../store/redux/budget";
+import { costDeleteTrigger, setPackageCost, setPackageEventID } from "../../../store/redux/budget";
 import UpdateCostModal from "../../../components/budget/UpdateCostModal";
 import { updateBudget } from "../../../functions/budgetFunctions/budgetFunctions";
 
@@ -25,19 +25,20 @@ const SingleCost = () => {
     useEffect(() => {
         const fetchCost = async () => {
             if (budgetData && (typeof (costID) === "string")) {
-                const data = await readCost(budgetData?.id, costID)
+                const data = await readCost(budgetData.id, costID)
                 setCost(data);
+                console.log("enter");
             }
         }
         fetchCost();
-    }, [remoteTriggers[1], remoteTriggers[2]]) // for deletes and updates
+    }, [remoteTriggers[0], remoteTriggers[1], remoteTriggers[2]]) // for added vendors, deletes, and updates
 
     useEffect(() => {
         if (cost && cost.vendorID) {
             selectVendorByTypeAndID(cost.vendorType, cost.vendorID)
                 .then((vendorData) => {
                     if (vendorData) {
-                        console.log(vendorData[0]);
+                        // console.log(vendorData[0]);
                         setVendor(vendorData[0]);
                     }
                 })
@@ -72,27 +73,35 @@ const SingleCost = () => {
         ])
     }
 
+    const setCostPackage = () => {
+        if (cost && budgetData) {
+            dispatch(setPackageCost(cost));
+            dispatch(setPackageEventID(budgetData?.eventId));
+        }
+    }
+
     return (
         <>
-            {cost && !vendor &&
-                <View>
-                    <Text>Book {cost.vendorType}</Text>
+            {cost && !vendor && cost.vendorType !== "other" &&
+                <View style={styles.container}>
+                    <Text style={styles.title}>Book {cost.vendorType}</Text>
                     <Link href={{ pathname: "(vendor_files)/VendorTypePage", params: { type: cost.vendorType, title: cost.vendorType.charAt(0).toUpperCase() + cost.vendorType.slice(1) } }} asChild>
-                        <TouchableOpacity>
-                            <Text>Book!</Text>
+                        <TouchableOpacity style={styles.buttonPrimary} onPress={setCostPackage}>
+                            <Text style={styles.buttonText}>Book!</Text>
                         </TouchableOpacity>
                     </Link>
                 </View>
             }
-            {cost && vendor &&
+            {cost && (vendor || cost.vendorType === "other") &&
                 <View style={styles.container}>
                     <Text style={styles.title}>Party Cost</Text>
-                    <Text style={styles.vendorName}>{vendor.name}</Text>
-                    <Text>{"Cost: $" + cost.costInDollar}</Text>
-                    <TouchableOpacity style={styles.button} onPress={removeCost}>
+                    {vendor && <Text style={styles.vendorName}>{vendor.name}</Text>}
+                    {!vendor && <Text style={styles.vendorName}>Miscellaneous</Text>}
+                    <Text style={styles.cost}>{"Cost: $" + cost.costInDollar}</Text>
+                    <TouchableOpacity style={styles.buttonDanger} onPress={removeCost}>
                         <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={() => setShowModal(true)}>
+                    <TouchableOpacity style={styles.buttonPrimary} onPress={() => setShowModal(true)}>
                         <Text style={styles.buttonText}>Update</Text>
                     </TouchableOpacity>
                     {showModal && budgetData &&
@@ -121,13 +130,27 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 10,
+        color: '#333',
     },
     vendorName: {
         fontSize: 18,
         marginBottom: 20,
+        color: '#666',
     },
-    button: {
+    cost: {
+        fontSize: 16,
+        marginBottom: 20,
+        color: '#666',
+    },
+    buttonPrimary: {
         backgroundColor: '#007BFF',
+        padding: 10,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    buttonDanger: {
+        backgroundColor: '#FF3B30',
         padding: 10,
         borderRadius: 8,
         alignItems: 'center',

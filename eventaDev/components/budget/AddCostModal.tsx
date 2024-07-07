@@ -4,7 +4,7 @@ import { Budget } from "../../interfaces/budgetInterface";
 import { useEffect, useState } from "react";
 
 type AddCostModalProps = {
-    addCost: (budgetID: string, costInDollar: number, vendorType: string) => Promise<void>
+    addCost: (budgetID: string, remainder: number, costInDollar: number, vendorType: string) => Promise<void>
     hideModal: () => void
     budget: Budget
 }
@@ -30,7 +30,7 @@ const AddCostModal = ({ addCost, hideModal, budget }: AddCostModalProps) => {
         })
 
         if (vendorType) {
-            await addCost(budget.id, costInDollar, vendorType);
+            await addCost(budget.id, budget.remainder, costInDollar, vendorType);
             hideModal();
         } else {
             Alert.alert("Fill out the whole form");

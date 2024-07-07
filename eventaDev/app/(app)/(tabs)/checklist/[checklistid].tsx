@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Text, View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../store/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { Task } from "../../../../interfaces/taskInterface";
 import { Checklist } from "../../../../interfaces/checklistInterface";
 import { createChecklist, readChecklist } from "../../../../functions/checklistFunctions/checklistFunctions";
 import { readTasks, setEventTypeTasks } from "../../../../functions/checklistFunctions/taskFunctions";
+import { setTasks, setChecklistData } from "../../../../store/redux/checklist";
 import { supabase } from "../../../../lib/supabase";
 import { Link } from "expo-router";
 
@@ -20,13 +21,14 @@ type TaskData =
 
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
-  const [checklistData, setChecklistData] = useState<Checklist | null>(null);
-  const [tasks, setTasks] = useState<TaskData[]>([]);
+  const checklistData = useSelector((state: RootState) => state.checklistSystem.checklistData);
+  const tasks = useSelector((state: RootState) => state.checklistSystem.tasks);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchChecklist = async () => {
-      setChecklistData(null);
-      setTasks([]);
+      dispatch(setChecklistData(null));
+      dispatch(setTasks(null));
 
       if (event?.id) {
         console.log("Fetching checklist for event ID:", event.id);
@@ -40,7 +42,7 @@ const UserPage = () => {
             await setEventTypeTasks(checklist);
           }
         }
-        setChecklistData(checklist);
+        dispatch(setChecklistData(checklist));
         if (checklist) {
           fetchTasks(checklist.id, event.created_at, event.eventDate);
         }
@@ -48,7 +50,7 @@ const UserPage = () => {
     };
 
     fetchChecklist();
-  }, [event, event?.id]);
+  }, [event, event?.id, dispatch]);
 
   const fetchTasks = async (checklistId: number, createdAt: string, eventDate: string) => {
     console.log("Fetching tasks for checklist ID:", checklistId);
@@ -62,10 +64,8 @@ const UserPage = () => {
       { type: 'header', data: 'Completed' as const },
       ...completedTasks.map(task => ({ type: 'task' as const, data: task }))
     ];
-    setTasks(formattedData);
-    if (formattedData) {
-      console.log("Fetched tasks successfully!");
-    }
+    dispatch(setTasks(formattedData));
+    console.log("Fetched tasks successfully!");
   };
 
   const distributeTasks = (tasks: Task[], createdAt: string, eventDate: string) => {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: 'bold',
     marginTop: 20,
     backgroundColor: '#fff', // Ensure the background color of header is white to avoid overlapping text

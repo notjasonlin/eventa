@@ -1,11 +1,15 @@
-import { createSlice, PayloadAction} from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Checklist } from '../../interfaces/checklistInterface';
-import { Task } from "../../interfaces/taskInterface";
+import { Task } from "../../interfaces/taskInterface";
 
+interface TaskData {
+    type: 'header' | 'task';
+    data: Task | string;
+}
 
 interface ChecklistSystemState {
-    checklistData: Checklist | null,
-    tasks: Task[] | null,
+    checklistData: Checklist | null;
+    tasks: TaskData[] | null;
 }
 
 const initialState: ChecklistSystemState = {
@@ -20,11 +24,11 @@ const checklistSlice = createSlice({
         setChecklistData(state, action: PayloadAction<Checklist | null>) {
             state.checklistData = action.payload;
         },
-        setTasks(state, action: PayloadAction<Task[] | null>) {
+        setTasks(state, action: PayloadAction<TaskData[] | null>) {
             state.tasks = action.payload;
         },
     }
-})
+});
 
 export const { setChecklistData, setTasks } = checklistSlice.actions;
 export default checklistSlice.reducer;

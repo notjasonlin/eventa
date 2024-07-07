@@ -97,3 +97,33 @@ export const setEventTypeTasks = async (checklist: Checklist) => {
     }
   }
 };
+
+// New functions: editTask and deleteTask
+
+export const editTask = async (taskID: number, updatedTask: Partial<Task>) => {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(updatedTask)
+    .eq('id', taskID);
+
+  if (error) {
+    console.error("Error updating task:", error);
+    return null;
+  } else {
+    return data;
+  }
+}
+
+export const deleteTask = async (taskID: number) => {
+  const { data, error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskID);
+
+  if (error) {
+    console.error("Error deleting task:", error);
+    return null;
+  } else {
+    return data;
+  }
+}

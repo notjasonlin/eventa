@@ -44,10 +44,10 @@ const UserPage = () => {
   }, [event]);
 
   const fetchTasks = async (checklistId: number) => {
-    console.log("Fetching tasks for checklist ID:", checklistId);
+    //console.log("Fetching tasks for checklist ID:", checklistId);
     const fetchedTasks = await readTasks(checklistId);
     setTasks(fetchedTasks || []);
-    console.log("Fetched tasks:", fetchedTasks);
+    //console.log("Fetched tasks:", fetchedTasks);
   };
 
   const handleToggle = () => {

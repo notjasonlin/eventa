@@ -18,6 +18,22 @@ export const readTasks = async (checklistID: number): Promise<Task[] | null> => 
   }
 };
 
+export const readSingleTask = async (taskID: number): Promise<Task | null> => {
+  let { data: task, error} = await supabase
+  .from('tasks')
+  .select('*')
+  .eq('id', taskID);
+
+  if (error) {
+    console.log("Error fetching single task", error);
+    return null;
+  } else if (!task) {
+    return null;
+  } else {
+    return task[0] as Task;
+  }
+}
+
 export const addTask = async (task: Task) => {
   const { data, error } = await supabase
     .from('tasks')
@@ -81,3 +97,33 @@ export const setEventTypeTasks = async (checklist: Checklist) => {
     }
   }
 };
+
+// New functions: editTask and deleteTask
+
+export const editTask = async (taskID: number, updatedTask: Partial<Task>) => {
+  const { data, error } = await supabase
+    .from('tasks')
+    .update(updatedTask)
+    .eq('id', taskID);
+
+  if (error) {
+    console.error("Error updating task:", error);
+    return null;
+  } else {
+    return data;
+  }
+}
+
+export const deleteTask = async (taskID: number) => {
+  const { data, error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskID);
+
+  if (error) {
+    console.error("Error deleting task:", error);
+    return null;
+  } else {
+    return data;
+  }
+}

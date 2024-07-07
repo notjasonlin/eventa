@@ -1,30 +1,39 @@
 import { useEffect, useState } from "react";
 import { Text, View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../../store/redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { Task } from "../../../../interfaces/taskInterface";
 import { Checklist } from "../../../../interfaces/checklistInterface";
 import { createChecklist, readChecklist } from "../../../../functions/checklistFunctions/checklistFunctions";
 import { readTasks, setEventTypeTasks } from "../../../../functions/checklistFunctions/taskFunctions";
+import { setTasks, setChecklistData } from "../../../../store/redux/checklist";
 import { supabase } from "../../../../lib/supabase";
+import { Link } from "expo-router";
 
 interface CheckboxProps {
   task: Task;
   onToggle: () => void;
 }
 
+type TaskData = 
+  | { type: 'header'; data: string }
+  | { type: 'task'; data: Task };
+
 const UserPage = () => {
   const event = useSelector((state: RootState) => state.selectedEvent.event);
-  const [checklistData, setChecklistData] = useState<Checklist | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const checklistData = useSelector((state: RootState) => state.checklistSystem.checklistData);
+  const tasks = useSelector((state: RootState) => state.checklistSystem.tasks);
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchChecklist = async () => {
-      setChecklistData(null);
-      setTasks([]);
+      dispatch(setChecklistData(null));
+      dispatch(setTasks(null));
+
       if (event?.id) {
         console.log("Fetching checklist for event ID:", event.id);
         let checklist = await readChecklist(event.id);
+
         if (!checklist) {
           console.log("No checklist found, creating new checklist...");
           checklist = await createChecklist({ eventId: event.id, eventType: event.eventType, id: Math.floor(Math.random() * 1000) });
@@ -33,31 +42,71 @@ const UserPage = () => {
             await setEventTypeTasks(checklist);
           }
         }
-        setChecklistData(checklist);
+        dispatch(setChecklistData(checklist));
         if (checklist) {
-          fetchTasks(checklist.id);
+          fetchTasks(checklist.id, event.created_at, event.eventDate);
         }
       }
     };
 
     fetchChecklist();
-  }, [event]);
+  }, [event, event?.id, dispatch]);
 
-  const fetchTasks = async (checklistId: number) => {
-    //console.log("Fetching tasks for checklist ID:", checklistId);
+  const fetchTasks = async (checklistId: number, createdAt: string, eventDate: string) => {
+    console.log("Fetching tasks for checklist ID:", checklistId);
     const fetchedTasks = await readTasks(checklistId);
-    setTasks(fetchedTasks || []);
-    //console.log("Fetched tasks:", fetchedTasks);
+    const sortedTasks = (fetchedTasks || []).sort((a, b) => a.order - b.order);
+    const todoTasks = sortedTasks.filter(task => !task.isCompleted);
+    const completedTasks = sortedTasks.filter(task => task.isCompleted);
+    const formattedTasks = distributeTasks(todoTasks, createdAt, eventDate);
+    const formattedData: TaskData[] = [
+      ...formattedTasks,
+      { type: 'header', data: 'Completed' as const },
+      ...completedTasks.map(task => ({ type: 'task' as const, data: task }))
+    ];
+    dispatch(setTasks(formattedData));
+    console.log("Fetched tasks successfully!");
   };
 
-  const handleToggle = () => {
-    if (checklistData) {
-      fetchTasks(checklistData.id);
+  const distributeTasks = (tasks: Task[], createdAt: string, eventDate: string) => {
+    const start = new Date(createdAt);
+    const end = new Date(eventDate);
+
+    const totalMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+    const totalTasks = tasks.length;
+    const tasksPerMonth = Math.floor(totalTasks / totalMonths);
+    const remainingTasks = totalTasks % totalMonths;
+
+    const distributedTasks: TaskData[] = [];
+    let taskIndex = 0;
+
+    for (let i = 0; i < totalMonths; i++) {
+      const currentMonth = new Date(start.getFullYear(), start.getMonth() + i);
+      const monthName = currentMonth.toLocaleString('default', { month: 'long' });
+      const year = currentMonth.getFullYear();
+      const header = `${monthName} ${year}`;
+
+      distributedTasks.push({ type: 'header', data: header });
+
+      for (let j = 0; j < tasksPerMonth && taskIndex < totalTasks; j++) {
+        distributedTasks.push({ type: 'task', data: tasks[taskIndex++] });
+      }
+      // Add remaining tasks one per month
+      if (i < remainingTasks && taskIndex < totalTasks) {
+        distributedTasks.push({ type: 'task', data: tasks[taskIndex++] });
+      }
+    }
+
+    return distributedTasks;
+  };
+
+  const handleToggle = async (task: Task) => {
+    const newStatus = !task.isCompleted;
+    await updateTaskCompletion(task.id, newStatus); // Update task completion in the database
+    if (checklistData && event) {
+      fetchTasks(checklistData.id, event.created_at, event.eventDate); // Refresh the task list
     }
   };
-
-  const todoTasks = tasks.filter(task => !task.isCompleted);
-  const completedTasks = tasks.filter(task => task.isCompleted);
 
   if (!event) {
     return (
@@ -69,21 +118,19 @@ const UserPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Todo</Text>
       <FlatList
-        data={todoTasks}
-        renderItem={({ item }) => (
-          <TaskCheckbox task={item} onToggle={handleToggle} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-      />
-      <Text style={styles.header}>Completed</Text>
-      <FlatList
-        data={completedTasks}
-        renderItem={({ item }) => (
-          <TaskCheckbox task={item} onToggle={handleToggle} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
+        data={tasks}
+        renderItem={({ item }) => {
+          if (item.type === 'header') {
+            return <Text style={styles.header}>{item.data}</Text>;
+          } else {
+            const task = item.data;
+            return (
+              <TaskCheckbox task={task} onToggle={() => handleToggle(task)} />
+            );
+          }
+        }}
+        keyExtractor={(item, index) => index.toString()}
       />
     </View>
   );
@@ -92,20 +139,31 @@ const UserPage = () => {
 const TaskCheckbox: React.FC<CheckboxProps> = ({ task, onToggle }) => {
   const [isChecked, setIsChecked] = useState(task.isCompleted);
 
-  const handleToggle = async () => {
-    const newStatus = !isChecked;
-    setIsChecked(newStatus);
-    await updateTaskCompletion(task.id, newStatus); // Update task completion in the database
-    onToggle(); // Callback to refresh the task list
+  useEffect(() => {
+    setIsChecked(task.isCompleted);
+  }, [task]);
+
+  const handleCheckboxToggle = async () => {
+    await onToggle();
+    setIsChecked(!isChecked);
   };
 
   return (
-    <TouchableOpacity style={styles.taskContainer} onPress={handleToggle}>
-      <View style={[styles.checkbox, isChecked && styles.checkedCheckbox]}>
-        {isChecked && <Text style={styles.checkmark}>✓</Text>}
-      </View>
-      <Text style={[styles.taskText, isChecked && styles.completedTaskText]}>{task.name}</Text>
-    </TouchableOpacity>
+    <View style={styles.taskContainer}>
+      <TouchableOpacity style={styles.checkboxContainer} onPress={handleCheckboxToggle}>
+        <View style={[styles.checkbox, isChecked && styles.checkedCheckbox]}>
+          {isChecked && <Text style={styles.checkmark}>✓</Text>}
+        </View>
+      </TouchableOpacity>
+      <Link href={{
+        pathname: "/(checklist_files)/singleTask",
+        params: { taskID: task.id }
+      }} asChild>
+        <TouchableOpacity style={styles.taskTextContainer}>
+          <Text style={[styles.taskText, isChecked && styles.completedTaskText]}>{task.name}</Text>
+        </TouchableOpacity>
+      </Link>
+    </View>
   );
 };
 
@@ -129,9 +187,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    fontSize: 18,
+    fontSize: 25,
     fontWeight: 'bold',
     marginTop: 20,
+    backgroundColor: '#fff', // Ensure the background color of header is white to avoid overlapping text
+    paddingVertical: 5, // Add some padding for better spacing
+    paddingHorizontal: 10,
   },
   taskContainer: {
     flexDirection: 'row',
@@ -139,6 +200,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+  },
+  checkboxContainer: {
+    marginRight: 10,
   },
   checkbox: {
     width: 20,
@@ -155,8 +219,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  taskTextContainer: {
+    flex: 1,
+  },
   taskText: {
-    marginLeft: 10,
     fontSize: 16,
   },
   completedTaskText: {

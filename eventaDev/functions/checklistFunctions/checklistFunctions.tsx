@@ -6,6 +6,7 @@ export const readChecklist = async (eventID: string): Promise<Checklist | null> 
     let { data: checklist, error } = await supabase
         .from('checklists')
         .select('*')
+        .eq('eventId', eventID);
     
     if (error) {
         console.error("Error reading checklist:", error);

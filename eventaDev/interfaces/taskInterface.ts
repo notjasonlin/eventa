@@ -1,4 +1,5 @@
 export interface Task {
+    order: number,
     id: number,
     checklistId: string,
     name: string,

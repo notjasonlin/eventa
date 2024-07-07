@@ -9,17 +9,19 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
-import { costAddTrigger } from '../../../store/redux/budget';
+import { costAddTrigger, setBudgetData } from '../../../store/redux/budget';
 import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useLayoutEffect } from 'react';
 import event from '../../../store/redux/event';
+import { addCost, readUnbookedCosts, updateCost } from '../../../functions/budgetFunctions/costFunctions';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
     const upcomingEvents = useSelector((state: RootState) => state.currentEvents.upcomingEvents);
     const session = useSelector((state: RootState) => state.authentication.session);
     const budget = useSelector((state: RootState) => state.budgetSystem.budgetData);
+    const costBookPackage = useSelector((state: RootState) => state.budgetSystem.costBookPackage);
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
     const [showModal, setShowModal] = useState<boolean>(false);
@@ -55,7 +57,7 @@ const SingleVendor = () => {
     useEffect(() => {
         if (showModal && (!upcomingEvents || upcomingEvents.length === 0)) {
 
-            if (upcomingEvents) console.log(upcomingEvents.length)
+            // if (upcomingEvents) console.log(upcomingEvents.length)
 
             Alert.alert(
                 "No existing events",
@@ -92,16 +94,37 @@ const SingleVendor = () => {
             if (vendor?.id !== undefined) {
                 const completeBook = async () => {
                     if (budgetData) {
-                        // console.log("START");
-                        // console.log(budgetData)
-                        // console.log(vendor.id)
-                        // console.log("END");
-                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost);
+                        let cost = null;
+                        if (costBookPackage.cost) {
+                            cost = costBookPackage.cost;
+                        } else {
+                            const unbookedCosts = await readUnbookedCosts(budgetData.id); // check if there are cost without booked vendors
+                            let searching = true;
+                            let i = 0;
+                            while (unbookedCosts && searching) {
+                                cost = unbookedCosts[i++];
+                                if (cost.vendorType === vendor.vendorType) searching = false;
+                            }
+                        }
+
+                        if (cost) {
+                            await updateCost(budgetData.id, cost.id, { vendorID: vendor.id, costInDollar: vendor.cost })
+                        } else {
+                            await addCost({
+                                budgetID: budgetData?.id,
+                                vendorType: vendor.vendorType,
+                                vendorID: vendor.id,
+                                costInDollar: vendor.cost,
+                                // Add other details once available
+                            });
+                        }
+                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost,);
                         await updateBudget(budgetData.id, remainder, vendor.cost);
+                        const budget = await readBudget(event.id);
+                        dispatch(setBudgetData(budget));
                         dispatch(costAddTrigger());
                         setShowModal(false);
                     }
-
                 }
 
                 const booking = await selectBookedVendor(vendor.id, event.id, vendor.vendorType)
@@ -152,7 +175,20 @@ const SingleVendor = () => {
             </View>
             <Image source={DEFAULT_IMAGE} style={styles.vendorImage} />
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.bookButton} onPress={() => setShowModal(true)}>
+                <TouchableOpacity style={styles.bookButton} onPress={() => {
+                    const event = upcomingEvents?.find(event => {
+                        if (costBookPackage.eventID) {
+                            return event.id === costBookPackage.eventID;
+                        } else {
+                            return null;
+                        }
+                    });
+                    if (event) {
+                        handleBook(event);
+                    } else {
+                        setShowModal(true);
+                    }
+                }}>
                     <Text style={styles.bookButtonText}>Book now!</Text>
                 </TouchableOpacity>
             </View>

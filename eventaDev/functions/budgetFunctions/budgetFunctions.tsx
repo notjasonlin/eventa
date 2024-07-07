@@ -42,8 +42,6 @@ export const updateBudget = async (budgetID: string, remainder: number, sub: num
         .update({ remainder: newRemainder })
         .eq('id', budgetID)
 
-    console.log(data);
-
     if (error) {
         console.error(error);
     }

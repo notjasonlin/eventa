@@ -25,24 +25,33 @@ export const readCosts = async (budgetID: string): Promise<{
         const other: Cost[] = [];
 
         costs.filter((cost: Cost) => {
-            if (cost.vendorType === "Venue") {
+            if (cost.vendorType === "venues") {
                 venues.push(cost);
-            } else if (cost.vendorType === "Catering") {
+            } else if (cost.vendorType === "catering") {
                 catering.push(cost);
-            } else if (cost.vendorType === "Photographers") {
+            } else if (cost.vendorType === "photographers") {
                 photographers.push(cost);
-            } else if (cost.vendorType === "Entertainment") {
+            } else if (cost.vendorType === "entertainment") {
                 entertainment.push(cost);
-            } else if (cost.vendorType === "Decoration") {
+            } else if (cost.vendorType === "decoration") {
                 decoration.push(cost);
             } else {
                 other.push(cost);
             }
         });
 
-        return { costs, venues, catering, photographers, entertainment, decoration, other }
+        return {
+            costs,
+            venues,
+            catering,
+            photographers,
+            entertainment,
+            decoration,
+            other
+        }
     }
 }
+
 
 export const readCost = async (budgetID: string, costID: string): Promise<Cost | null> => {
     let { data: cost, error } = await supabase

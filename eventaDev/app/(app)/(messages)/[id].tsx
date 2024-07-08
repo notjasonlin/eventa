@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import { useLayoutEffect } from "react";
 
 const MessagesPage = () => {
@@ -8,6 +8,7 @@ const MessagesPage = () => {
     useLayoutEffect(() => {
       navigation.setOptions({
           title: "Messages",
+          
       });
   }, [navigation]);
     return (

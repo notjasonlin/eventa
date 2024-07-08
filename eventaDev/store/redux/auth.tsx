@@ -5,10 +5,17 @@ import { supabase } from '../../lib/supabase';
 
 interface AuthState {
     session: Session | null;
+    profile: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        gender: string;
+    } | null;
 }
 
 const initialState: AuthState = {
-    session: null
+    session: null,
+    profile: null,
 };
 
 const authSlice = createSlice({
@@ -27,14 +34,21 @@ const authSlice = createSlice({
             .addCase(signUp.fulfilled, (state, action: PayloadAction<Session | null>) => {
                 state.session = action.payload;
             })
-            .addCase(signOut.fulfilled, (state, action: PayloadAction<null>) => {
-                state.session = action.payload;
+            .addCase(signOut.fulfilled, (state) => {
+                state.session = null;
+                state.profile = null;
             })
             .addCase(signInWithPhone.fulfilled, (state, action: PayloadAction<Session | null>) => {
                 state.session = action.payload;
             })
             .addCase(verifyOtp.fulfilled, (state, action: PayloadAction<Session | null>) => {
                 state.session = action.payload;
+            })
+            .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<AuthState['profile']>) => {
+                state.profile = action.payload;
+            })
+            .addCase(updateProfile.fulfilled, (state, action: PayloadAction<AuthState['profile']>) => {
+                state.profile = action.payload;
             });
     },
 });
@@ -102,6 +116,40 @@ export const verifyOtp = createAsyncThunk(
         return session;
     }
 )
+
+export const fetchProfile = createAsyncThunk(
+    "auth/fetchProfile",
+    async (userId: string) => {
+        const { data, error } = await supabase
+            .from('profile')
+            .select('firstName, lastName, email, gender')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            Alert.alert(error.message);
+            return null;
+        }
+
+        return data;
+    }
+);
+
+export const updateProfile = createAsyncThunk(
+    "auth/updateProfile",
+    async (profile: { firstName: string, lastName: string, email: string, gender: string }) => {
+        const { error } = await supabase
+            .from('profile')
+            .update(profile);
+
+        if (error) {
+            Alert.alert(error.message);
+            return null;
+        }
+
+        return profile;
+    }
+);
 
 export const { setSession } = authSlice.actions;
 export default authSlice.reducer;

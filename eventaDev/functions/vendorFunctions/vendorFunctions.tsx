@@ -37,7 +37,7 @@ export const selectVendorByTypeAndID = async (vendorType: string, vendorID: stri
   if (error) {
     console.error('Error fetching venue:', error);
   } else {
-    console.log('Fetched venue:', venue);
+    // console.log('Fetched venue:', venue);
     return venue;
   }
   return null;

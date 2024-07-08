@@ -5,9 +5,10 @@ import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { readBudget, updateBudget } from "../../../../functions/budgetFunctions/budgetFunctions";
 import { addCost, readCosts } from "../../../../functions/budgetFunctions/costFunctions";
 import AddCostModal from "../../../../components/budget/AddCostModal";
-import { setBudgetData, setCosts } from "../../../../store/redux/budget";
+import { setAllCosts, setBudgetData, setCateringCosts, setCosts, setDecorationCosts, setEntertainmentCosts, setPhotographerCosts, setVenueCosts } from "../../../../store/redux/budget";
 import { Link, useRouter } from "expo-router";
 import { AntDesign } from '@expo/vector-icons';
+import { setCatering } from "../../../../store/redux/event";
 
 const UserPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -22,7 +23,7 @@ const UserPage = () => {
 
   useEffect(() => {
     dispatch(setBudgetData(null));
-    dispatch(setCosts(null));
+    dispatch(setAllCosts(null));
 
     if (event?.id) {
       const fetchBudget = async () => {
@@ -38,8 +39,7 @@ const UserPage = () => {
       if (budgetData) {
         const costData = await readCosts(budgetData.id);
         if (costData) {
-          dispatch(setCosts(costData.costs));
-          // set different cost types here
+          dispatch(setAllCosts(costData));
         }
       }
     }

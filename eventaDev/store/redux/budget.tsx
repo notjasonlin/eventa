@@ -39,7 +39,7 @@ const budgetSlice = createSlice({
         setBudgetData(state, action: PayloadAction<Budget | null>) {
             state.budgetData = action.payload;
         },
-        setCosts(state, action: PayloadAction<Cost[] | null>) {
+        setCosts(state, action: PayloadAction<Cost[] | null>) { // Possibly delete starting here
             state.costs = action.payload;
         },
         setVenueCosts(state, action: PayloadAction<Cost[] | null>) {
@@ -56,6 +56,18 @@ const budgetSlice = createSlice({
         },
         setDecorationCosts(state, action: PayloadAction<Cost[] | null>) {
             state.decorationCosts = action.payload;
+        }, // to here
+        setAllCosts(state, action: PayloadAction<{
+            costs: Cost[], venues: Cost[], catering: Cost[],
+            photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
+        } | null>) {
+            const payload = action.payload;
+            state.costs = payload ? payload.costs : null;
+            state.venueCosts = payload ? payload.venues : null;
+            state.cateringCosts = payload ? payload.catering : null;
+            state.photographerCosts = payload ? payload.photographers : null;
+            state.entertainmentCosts = payload ? payload.entertainment : null;
+            state.decorationCosts = payload ? payload.decoration : null;
         },
         costAddTrigger(state) {
             state.costTriggers[0] = !state.costTriggers[0];
@@ -75,6 +87,6 @@ const budgetSlice = createSlice({
     }
 })
 
-export const { setBudgetData, setCosts, setVenueCosts, setCateringCosts, setPhotographerCosts, setEntertainmentCosts,
-    setDecorationCosts, costAddTrigger, costDeleteTrigger, costUpdateTrigger, setPackageCost, setPackageEventID} = budgetSlice.actions;
+export const { setBudgetData, setAllCosts, setCosts, setVenueCosts, setCateringCosts, setPhotographerCosts, setEntertainmentCosts,
+    setDecorationCosts, costAddTrigger, costDeleteTrigger, costUpdateTrigger, setPackageCost, setPackageEventID } = budgetSlice.actions;
 export default budgetSlice.reducer;

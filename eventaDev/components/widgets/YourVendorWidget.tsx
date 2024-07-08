@@ -3,15 +3,18 @@ import { View, StyleSheet, Text, TouchableOpacity, ScrollView } from "react-nati
 import { Cost } from "../../interfaces/costInterface";
 import YourVendorCard from "./YourVendorCard";
 import { Link } from "expo-router";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/redux/store";
 
-type YourVendorWidgetProps = {
-    vendorsOne: Cost[] | null,
-    vendorsTwo: Cost[] | null,
-    vendorsThree: Cost[] | null,
-    types: string[]
-}
+const YourVendorWidget = () => {
+    const catering = useSelector((state: RootState) => state.budgetSystem.cateringCosts);
+    const entertainment = useSelector((state: RootState) => state.budgetSystem.entertainmentCosts);
+    const venues = useSelector((state: RootState) => state.budgetSystem.venueCosts);
+    const decoration = useSelector((state: RootState) => state.budgetSystem.decorationCosts);
+    const photographers = useSelector((state: RootState) => state.budgetSystem.photographerCosts);
 
-const YourVendorWidget = ({ vendorsOne, vendorsTwo, vendorsThree, types }: YourVendorWidgetProps) => {
+    const types = ["catering", "entertainment", "venues", "decoration", "photographers"];
+
     return (
         <View>
             <View style={styles.header}>
@@ -22,20 +25,28 @@ const YourVendorWidget = ({ vendorsOne, vendorsTwo, vendorsThree, types }: YourV
                     </TouchableOpacity>
                 </Link>
             </View>
-            <View style={styles.container}>
+            <ScrollView style={styles.container} horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.containerContent} >
                 <View style={styles.vendorSection}>
-                    <YourVendorCard vendors={vendorsOne} type={types[0]} />
+                    <YourVendorCard vendors={catering} type={types[0]} />
                     <Text>{types[0].charAt(0).toUpperCase() + types[0].slice(1)}</Text>
                 </View>
                 <View style={styles.vendorSection}>
-                    <YourVendorCard vendors={vendorsTwo} type={types[1]} />
+                    <YourVendorCard vendors={entertainment} type={types[1]} />
                     <Text>{types[1].charAt(0).toUpperCase() + types[1].slice(1)}</Text>
                 </View>
                 <View style={styles.vendorSection}>
-                    <YourVendorCard vendors={vendorsThree} type={types[2]} />
+                    <YourVendorCard vendors={venues} type={types[2]} />
                     <Text>{types[2].charAt(0).toUpperCase() + types[2].slice(1)}</Text>
                 </View>
-            </View>
+                <View style={styles.vendorSection}>
+                    <YourVendorCard vendors={decoration} type={types[3]} />
+                    <Text>{types[3].charAt(0).toUpperCase() + types[3].slice(1)}</Text>
+                </View>
+                <View style={styles.vendorSection}>
+                    <YourVendorCard vendors={photographers} type={types[4]} />
+                    <Text>{types[4].charAt(0).toUpperCase() + types[4].slice(1)}</Text>
+                </View>
+            </ScrollView>
         </View>
     );
 }
@@ -60,9 +71,12 @@ const styles = StyleSheet.create({
     },
     container: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        // justifyContent: 'space-between',
+        // alignItems: 'center',
         padding: 10,
+    },
+    containerContent: {
+        paddingRight: 20,
     },
     vendorSection: {
         alignItems: 'center',

@@ -3,14 +3,11 @@ import { StyleSheet, View, Text, TextInput, Alert, TouchableOpacity } from 'reac
 import ModalSelector from 'react-native-modal-selector';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { supabase } from '../../../lib/supabase'; // Adjust the import based on your project structure
-//import { useAuth } from '../../context/auth';
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from '../../../store/redux/store';
 import { setEvents } from '../../../store/redux/events';
 import { router } from 'expo-router';
-import uuid from 'react-native-uuid'; 
-
-
+import uuid from 'react-native-uuid';
 
 const EventForm: React.FC = () => {
   const [eventType, setEventType] = useState<string>('');
@@ -18,12 +15,31 @@ const EventForm: React.FC = () => {
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [eventTime, setEventTime] = useState<Date | null>(null);
   const [location, setLocation] = useState<string>('Boston'); // Default to Boston
+  const [description, setDescription] = useState<string>(''); // Added description
   const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
   const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const session = useSelector((state: RootState) => state.authentication.session);
   const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = async () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!eventType) newErrors.eventType = 'Event type is required';
+    if (!eventName) newErrors.eventName = 'Event name is required';
+    if (!location) newErrors.location = 'Location is required';
+    if (!description) newErrors.description = 'Description is required';
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrorMessage('Please fill out all required fields');
+      return;
+    }
+
+    setErrorMessage('');
+
     if (session === null) {
       console.error("Session is null!");
     } else {
@@ -40,7 +56,8 @@ const EventForm: React.FC = () => {
             eventName,
             eventDate: eventDateValue,
             eventTime: eventTimeValue,
-            location
+            location,
+            description // Add description to the database
           }
         ]);
 
@@ -54,7 +71,7 @@ const EventForm: React.FC = () => {
         setEventDate(new Date());
         setEventTime(null);
         setLocation('Boston');
-        // router.push('../event/eventList');
+        setDescription(''); // Clear description
         router.back();
       }
     }
@@ -94,6 +111,7 @@ const EventForm: React.FC = () => {
           </Text>
         </View>
       </ModalSelector>
+      {errors.eventType && <Text style={styles.errorText}>{errors.eventType}</Text>}
 
       <Text style={styles.label}>Event Name</Text>
       <TextInput
@@ -103,6 +121,7 @@ const EventForm: React.FC = () => {
         placeholder="Enter event name"
         placeholderTextColor="#aaa"
       />
+      {errors.eventName && <Text style={styles.errorText}>{errors.eventName}</Text>}
 
       <Text style={styles.label}>Event Date</Text>
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
@@ -134,10 +153,24 @@ const EventForm: React.FC = () => {
         placeholder="Enter location"
         placeholderTextColor="#aaa"
       />
+      {errors.location && <Text style={styles.errorText}>{errors.location}</Text>}
+
+      <Text style={styles.label}>Description</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Enter description"
+        placeholderTextColor="#aaa"
+        multiline={true}
+        numberOfLines={4}
+      />
+      {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
 
       <TouchableOpacity style={styles.createButton} onPress={handleSubmit}>
         <Text style={styles.createButtonText}>Create Event</Text>
       </TouchableOpacity>
+      {errorMessage ? <Text style={styles.errorMessage}>{errorMessage}</Text> : null}
     </View>
   );
 };
@@ -151,64 +184,72 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 10,
-    color: '#000',
+    color: '#333',
+    fontFamily: 'HelveticaNeue-Medium',
   },
   input: {
     height: 40,
-    borderColor: 'black',
-    fontWeight: 'bold',
+    borderColor: '#D3D3D3',
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 20,
     paddingHorizontal: 10,
-    justifyContent: 'center',
-    color: '#000',
+    color: '#333',
+    backgroundColor: '#F9F9F9',
+    fontFamily: 'HelveticaNeue',
+  },
+  textArea: {
+    height: 100,
   },
   dropdown: {
     height: 40,
-    borderColor: 'black',  // Set border color to black
+    borderColor: '#D3D3D3',
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 20,
     justifyContent: 'center',
     paddingHorizontal: 10,
+    backgroundColor: '#F9F9F9',
   },
   dropdownText: {
-    color: 'black',  // Set dropdown text color to black
+    color: '#333',
     fontSize: 16,
-    fontWeight: 'bold',  // Make the text bold
-  },
-  dropdownPlaceholder: {
-    color: '#aaa',
-    fontSize: 16,
-  },
-  dropdownOptions: {
-    width: '90%',
-    marginLeft: '5%',
+    fontFamily: 'HelveticaNeue',
   },
   dropdownView: {
     height: 40,
     justifyContent: 'center',
   },
-  datePicker: {
-    width: '100%',
-    marginBottom: 20,
-  },
   timeText: {
-    color: '#000',
+    color: '#333',
     fontSize: 16,
-    fontWeight: 'bold',  // Make the text bold
+    fontFamily: 'HelveticaNeue',
   },
   createButton: {
     marginTop: 30,
     paddingVertical: 15,
     paddingHorizontal: 30,
-    backgroundColor: '#000',
-    borderRadius: 5,
+    backgroundColor: '#000', // emerald green
+    borderRadius: 8,
     alignItems: 'center',
   },
   createButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontFamily: 'HelveticaNeue-Bold',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+    fontFamily: 'HelveticaNeue',
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 10,
+    fontFamily: 'HelveticaNeue',
   },
 });
 

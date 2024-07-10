@@ -72,7 +72,6 @@ export const setEventTypeTasks = async (checklist: Checklist) => {
     if (error) {
       console.error("Error fetching template tasks: ", error);
     } else {
-      // console.log("Fetched template tasks:", templateTasks);
       if (templateTasks) {
         const tasksToAdd = templateTasks.map((task) => ({
           checklistID: checklist.id,
@@ -82,6 +81,7 @@ export const setEventTypeTasks = async (checklist: Checklist) => {
           isCompleted: false,
           id: Math.floor(Math.random() * 100000), // random unique integer
           order: task.id, // Assuming id in template is the order
+          monthDue: task.monthDue || null // Ensure monthDue is added, defaulting to null if not provided
         }));
 
         const { error: addTasksError } = await supabase

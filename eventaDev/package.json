@@ -15,6 +15,7 @@
     "@react-navigation/stack": "^6.3.29",
     "@reduxjs/toolkit": "^2.2.5",
     "@rneui/themed": "^4.0.0-rc.8",
+    "@stripe/stripe-react-native": "0.37.2",
     "@supabase/supabase-js": "^2.43.4",
     "buffer": "^6.0.3",
     "expo": "~51.0.8",
@@ -39,6 +40,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-uuid": "^2.0.2",
     "react-redux": "^9.1.2",
+    "stripe": "^16.2.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

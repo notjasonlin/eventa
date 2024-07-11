@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import { StyleSheet, View, Alert, Platform } from 'react-native';
 import { Button, Input } from '@rneui/themed';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from 'expo-router';
 import { RootState, AppDispatch } from '../../../store/redux/store';
@@ -12,6 +13,11 @@ export default function Account() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('');
+  const [dob, setDob] = useState<Date | null>(null);
+  const [phone, setPhone] = useState('');
+  const [id, setId] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
   const session = useSelector((state: RootState) => state.authentication.session);
   const profile = useSelector((state: RootState) => state.authentication.profile);
   const dispatch = useDispatch<AppDispatch>();
@@ -33,6 +39,9 @@ export default function Account() {
             setLastName(profile.lastName);
             setEmail(profile.email);
             setGender(profile.gender);
+            setDob(profile.dob ? new Date(profile.dob) : null);
+            setPhone(profile.phone ? profile.phone.toString() : '');
+            setId(profile.id); // Set the ID for updating profile
           }
         })
         .catch((error) => Alert.alert(error.message))
@@ -42,7 +51,7 @@ export default function Account() {
 
   const handleUpdateProfile = () => {
     setLoading(true);
-    dispatch(updateProfile({ firstName, lastName, email, gender }))
+    dispatch(updateProfile({ id, firstName, lastName, email, gender, dob: dob ? dob.toISOString() : null, phone: phone ? parseInt(phone) : null }))
       .unwrap()
       .then(() => Alert.alert('Success', 'Profile updated successfully'))
       .catch((error) => Alert.alert(error.message))
@@ -54,6 +63,16 @@ export default function Account() {
       .unwrap()
       .then(() => Alert.alert('Signed out successfully'))
       .catch((error) => Alert.alert(error.message));
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dob;
+    setShowDatePicker(Platform.OS === 'ios');
+    setDob(currentDate);
   };
 
   return (
@@ -69,6 +88,21 @@ export default function Account() {
       </View>
       <View style={styles.verticallySpaced}>
         <Input label="Gender" value={gender} onChangeText={setGender} />
+      </View>
+      <View style={styles.verticallySpaced}>
+        <Input label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      </View>
+      <View style={styles.verticallySpaced}>
+        <Button title="Select Date of Birth" onPress={showDatePickerModal} />
+        {dob && <Input label="Date of Birth" value={dob.toDateString()} editable={false} />}
+        {showDatePicker && (
+          <DateTimePicker
+            value={dob || new Date()}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button

@@ -3,14 +3,20 @@ import { Session } from '@supabase/supabase-js';
 import { Alert } from 'react-native';
 import { supabase } from '../../lib/supabase';
 
+interface Profile {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    gender: string;
+    dob: string | null;
+    phone: number | null;
+    created_at: string;
+}
+
 interface AuthState {
     session: Session | null;
-    profile: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        gender: string;
-    } | null;
+    profile: Profile | null;
 }
 
 const initialState: AuthState = {
@@ -44,10 +50,10 @@ const authSlice = createSlice({
             .addCase(verifyOtp.fulfilled, (state, action: PayloadAction<Session | null>) => {
                 state.session = action.payload;
             })
-            .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<AuthState['profile']>) => {
+            .addCase(fetchProfile.fulfilled, (state, action: PayloadAction<Profile | null>) => {
                 state.profile = action.payload;
             })
-            .addCase(updateProfile.fulfilled, (state, action: PayloadAction<AuthState['profile']>) => {
+            .addCase(updateProfile.fulfilled, (state, action: PayloadAction<Profile | null>) => {
                 state.profile = action.payload;
             });
     },
@@ -119,35 +125,56 @@ export const verifyOtp = createAsyncThunk(
 
 export const fetchProfile = createAsyncThunk(
     "auth/fetchProfile",
-    async (userId: string) => {
+    async (id: string) => {
+        //console.log(`Fetching profile for user ID: ${id}`);
         const { data, error } = await supabase
             .from('profile')
-            .select('firstName, lastName, email, gender')
-            .eq('id', userId)
+            .select('id, firstName, lastName, email, gender, dob, phone, created_at')
+            .eq('id', id)
             .single();
 
         if (error) {
+            console.error(`Error fetching profile for user ID: ${id}`, error.message);
             Alert.alert(error.message);
             return null;
         }
 
+        //console.log(`Fetched profile data:`, data);
         return data;
     }
 );
 
 export const updateProfile = createAsyncThunk(
     "auth/updateProfile",
-    async (profile: { firstName: string, lastName: string, email: string, gender: string }) => {
-        const { error } = await supabase
+    async (profile: { id: string, firstName: string, lastName: string, email: string, gender: string, dob: string | null, phone: number | null }) => {
+        const { id, firstName, lastName, email, gender, dob, phone } = profile;
+        //console.log(`Upserting profile for user ID: ${id}`);
+        
+        const updates = {
+            id,
+            firstName,
+            lastName,
+            email,
+            gender,
+            dob,
+            phone,
+        };
+
+        //console.log("Profile data to upsert:", updates);
+
+        const { data, error } = await supabase
             .from('profile')
-            .update(profile);
+            .upsert(updates)
+            .select(); // Make sure to select the updated record
 
         if (error) {
+            console.error(`Error upserting profile for user ID: ${id}`, error.message);
             Alert.alert(error.message);
             return null;
         }
 
-        return profile;
+        //console.log(`Profile upserted successfully for user ID: ${id}`, data);
+        return { id, firstName, lastName, email, gender, dob, phone, created_at: data[0].created_at };
     }
 );
 

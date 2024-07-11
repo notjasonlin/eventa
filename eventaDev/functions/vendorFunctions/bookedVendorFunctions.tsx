@@ -1,11 +1,11 @@
 import { supabase } from '../../lib/supabase';
 
-export const bookVendor = async (vendorID: string, eventID: string, vendorType: string, cost: number) => {
+export const bookVendor = async (vendorID: string, eventID: string, costID: string, vendorType: string, cost: number) => {
 
     const { data, error } = await supabase
         .from('bookedVendors')
         .insert([
-            { vendorID: vendorID, eventID: eventID, vendorType: vendorType, inBudget: true, cost: cost },
+            { vendorID: vendorID, eventID: eventID, costID: costID, vendorType: vendorType, cost: cost },
         ])
 
     if (error) {
@@ -23,7 +23,7 @@ export const selectBookedVendor = async (vendorID: string, eventID: string, vend
         .eq('vendorType', vendorType);
 
     if (error) {
-        console.error("Error booking vendor: " + error);
+        console.error("Error booking vendor: ", error);
     }
 
     // console.log(data);
@@ -56,33 +56,5 @@ export const removeBookedVendor = async (vendorID: string, eventID: string) => {
 
     if (error) {
         console.error("Error booking vendor: " + error);
-    }
-}
-
-export const setBookedVendorInBudget = async (vendorID: string, eventID: string, inBudget: boolean) => {
-    let { data, error } = await supabase
-        .from('bookedVendors')
-        .update({ "inBudget": inBudget })
-        .eq('vendorID', vendorID)
-        .eq('eventID', eventID)
-
-    if (error) {
-        console.error("Error booking vendor: " + error);
-    }
-}
-
-export const fetchBookedVendorsNotInBudget = async (eventID: string) => {
-    let { data, error } = await supabase
-        .from('bookedVendors')
-        .select('vendorID, eventID, vendorType, cost')
-        .eq('eventID', eventID)
-        .eq('inBudget', false)
-
-    // console.log(data);
-
-    if (error) {
-        console.error("Error booking vendor: " + error);
-    } else {
-        return data;
     }
 }

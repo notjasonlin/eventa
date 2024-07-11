@@ -1,8 +1,8 @@
 export interface BookedVendor {
     vendorID: string;
     eventID: string;
+    costID: string;
     vendorType: string;
-    inBudget: boolean;
     cost: number;
   }
   

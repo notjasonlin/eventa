@@ -9,12 +9,12 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
-import { costAddTrigger, setBudgetData } from '../../../store/redux/budget';
+import { costAddTrigger, setBudgetData, setPackageCost, setPackageEventID } from '../../../store/redux/budget';
 import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useLayoutEffect } from 'react';
-import event from '../../../store/redux/event';
 import { addCost, readUnbookedCosts, updateCost } from '../../../functions/budgetFunctions/costFunctions';
+import uuid from 'react-native-uuid';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
@@ -91,26 +91,38 @@ const SingleVendor = () => {
         }
 
         const book = async () => {
+            console.log(event)
+
+
             if (vendor?.id !== undefined) {
                 const completeBook = async () => {
                     if (budgetData) {
                         let cost = null;
                         if (costBookPackage.cost) {
                             cost = costBookPackage.cost;
+                            dispatch(setPackageCost(null));
+                            dispatch(setPackageEventID(null));
                         } else {
                             const unbookedCosts = await readUnbookedCosts(budgetData.id); // check if there are cost without booked vendors
                             let searching = true;
                             let i = 0;
-                            while (unbookedCosts && searching) {
-                                cost = unbookedCosts[i++];
-                                if (cost.vendorType === vendor.vendorType) searching = false;
+                            while (unbookedCosts && i < unbookedCosts.length && searching) {
+                                const curr = unbookedCosts[i++];
+                                if (curr.vendorType === vendor.vendorType) {
+                                    cost = curr;
+                                    searching = false;
+                                }
                             }
                         }
-
+                        let id = "";
                         if (cost) {
                             await updateCost(budgetData.id, cost.id, { vendorID: vendor.id, costInDollar: vendor.cost })
+                            id = cost.id
                         } else {
+                            console.log("CREATE NEW");
+                            id = uuid.v4().toString();
                             await addCost({
+                                id: id,
                                 budgetID: budgetData?.id,
                                 vendorType: vendor.vendorType,
                                 vendorID: vendor.id,
@@ -118,7 +130,7 @@ const SingleVendor = () => {
                                 // Add other details once available
                             });
                         }
-                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost,);
+                        await bookVendor(vendor.id, event.id, id, vendor.vendorType, vendor.cost);
                         await updateBudget(budgetData.id, remainder, vendor.cost);
                         const budget = await readBudget(event.id);
                         dispatch(setBudgetData(budget));

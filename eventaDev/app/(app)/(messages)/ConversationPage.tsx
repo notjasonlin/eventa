@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { TextInput, TouchableOpacity, View, Text, FlatList, StyleSheet } from "react-native";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { TextInput, TouchableOpacity, View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
 import { Message } from "../../../interfaces/messageInterface";
 import { fetchMessages, sendMessage } from "../../../functions/messagingFunctions/messageFunctions";
 import { supabase } from "../../../lib/supabase";
@@ -13,12 +13,12 @@ const ConversationPage = () => {
     const [recieverID, setRecieverID] = useState<string>("");
     const [messages, setMessages] = useState<Message[] | null>([])
     const [message, setMessage] = useState<string>("");
+    const flatListRef = useRef<FlatList<Message>>(null);
 
     useEffect(() => {
         const grabMessages = async () => {
             if (typeof convo === "string") {
                 const data = await fetchMessages(convo);
-                // const content: string[] | undefined = data?.filter((message) => message.content);
                 setMessages(data);
             }
         }
@@ -31,12 +31,17 @@ const ConversationPage = () => {
         }
     }, [])
 
-
     useLayoutEffect(() => {
         navigation.setOptions({
             title: recieverID,
         });
     }, [navigation]);
+
+    useEffect(() => {
+        if (messages && messages.length > 0 && flatListRef.current) {
+            flatListRef.current.scrollToEnd({ animated: false });
+        }
+    }, [messages]);
 
 
     const sendMessageContent = async () => {
@@ -59,7 +64,7 @@ const ConversationPage = () => {
                             if (prevMessages) {
                                 return [...prevMessages, newMessage];
                             } else {
-                                return [newMessage]; 
+                                return [newMessage];
                             }
                         });
                     }
@@ -72,19 +77,43 @@ const ConversationPage = () => {
         };
     }, [])
 
+
+    const renderMessage = (message: Message) => {
+        if (message.sender === senderID) {
+            return (
+                <View style={styles.senderMessage}>
+                    <View style={styles.senderContainer}>
+                        <Text style={styles.messageText}>{message.content}</Text>
+                    </View>
+                </View>
+            );
+        } else {
+            return (
+                <View style={styles.receiverMessage}>
+                    <View style={styles.recieverContainer}>
+                        <Text style={styles.messageText}>{message.content}</Text>
+                    </View>
+                </View>
+            );
+        }
+    }
+
     return (
         <>
             {messages &&
                 <View style={styles.container}>
                     <FlatList
+                        ref={flatListRef}
                         data={messages}
-                        renderItem={({ item }) => (
-                            <View style={styles.messageContainer}>
-                                <Text style={styles.messageText}>{item.content}</Text>
-                            </View>
-                        )}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => renderMessage(item)}
                         keyExtractor={(item, index) => index.toString()}
                         contentContainerStyle={styles.messagesList}
+                        onContentSizeChange={() => {
+                            if (messages.length > 0 && flatListRef.current) {
+                                flatListRef.current.scrollToEnd({ animated: false });
+                            }
+                        }}
                     />
 
                     <View style={styles.inputContainer}>
@@ -104,6 +133,9 @@ const ConversationPage = () => {
     );
 }
 
+const { width: screenWidth } = Dimensions.get('window');
+const maxWidth = screenWidth * 0.75;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -113,11 +145,33 @@ const styles = StyleSheet.create({
     messagesList: {
         paddingBottom: 10,
     },
-    messageContainer: {
-        backgroundColor: '#fff',
+    senderMessage: {
+        alignItems: 'flex-end',
+    },
+    receiverMessage: {
+        alignItems: 'flex-start',
+    },
+    senderContainer: {
+        backgroundColor: '#49936F',
         padding: 10,
         borderRadius: 5,
         marginBottom: 5,
+        maxWidth: maxWidth,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    recieverContainer: {
+        backgroundColor: '#c5cac7',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 5,
+        maxWidth: maxWidth,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,

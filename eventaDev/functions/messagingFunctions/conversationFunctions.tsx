@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase';
+import uuid from 'react-native-uuid';
 
 export const fetchConversations = async (userID: string) => {
     let { data: conversations, error } = await supabase
@@ -14,12 +15,17 @@ export const fetchConversations = async (userID: string) => {
     return conversations;
 }
 
-export const startConversation = async (user1ID: string, user2ID: string) => {
+export const startConversation = async (convoData: Record<string, any>) => {
+    const defaultValues = {
+        id: uuid.v4().toString(),
+    };
+
+    const mergedData = { ...defaultValues, ...convoData };
+
+
     const { data, error } = await supabase
         .from('conversations')
-        .insert([
-            { user1ID: user1ID, user2ID: user2ID },
-        ])
+        .insert([mergedData])
 
     if (error) {
         console.error("Error starting conversation:", error);

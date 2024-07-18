@@ -2,9 +2,17 @@ import { Stack } from "expo-router";
 import NavButton from "../../components/Buttons/NavButton";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { TransitionPresets } from '@react-navigation/stack';
+import * as Notifications from "expo-notifications";
+import { useEffect } from "react";
 
 
 const RootLayout = () => {
+    // useEffect(() => {
+    //     Notifications.getExpoPushTokenAsync().then((pushToken) => {
+    //         console.log("Push token", pushToken);
+    //     })
+    // }, [])
+
     return (
         <Stack>
             <Stack.Screen

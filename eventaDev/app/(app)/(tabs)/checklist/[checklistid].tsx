@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Text, View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Text, View, StyleSheet, FlatList, TouchableOpacity, TextInput, Button } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../../store/redux/store";
 import { Task } from "../../../../interfaces/taskInterface";
@@ -24,6 +24,7 @@ const UserPage = () => {
   const checklistData = useSelector((state: RootState) => state.checklistSystem.checklistData);
   const tasks = useSelector((state: RootState) => state.checklistSystem.tasks);
   const dispatch = useDispatch<AppDispatch>();
+  const [newTaskName, setNewTaskName] = useState("");
 
   useEffect(() => {
     const fetchChecklist = async () => {
@@ -108,6 +109,33 @@ const UserPage = () => {
     }
   };
 
+  const addTask = async () => {
+    if (newTaskName.trim() === "") return;
+    if (tasks) {
+      const newTask = {
+        id: Math.floor(Math.random() * 1000),
+        name: newTaskName,
+        isCompleted: false,
+        order: tasks.length + 1,
+        checklistID: checklistData?.id,
+      };
+  
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(newTask);
+  
+      if (error) {
+        console.error("Error adding task:", error);
+      } else {
+        console.log("Task added successfully:", data);
+        if (checklistData && event) {
+          fetchTasks(checklistData.id, event.created_at, event.eventDate); // Refresh the task list
+        }
+        setNewTaskName("");
+      }
+    }
+  };
+
   if (!event) {
     return (
       <View style={styles.container}>
@@ -122,16 +150,27 @@ const UserPage = () => {
         data={tasks}
         renderItem={({ item }) => {
           if (item.type === 'header') {
-            return <Text style={styles.header}>{item.data}</Text>;
+            return <Text style={styles.header}>{item.data as string}</Text>;
           } else {
-            const task = item.data;
+            const task = item.data as Task;
             return (
               <TaskCheckbox task={task} onToggle={() => handleToggle(task)} />
             );
           }
         }}
         keyExtractor={(item, index) => index.toString()}
+        showsVerticalScrollIndicator={false}
       />
+
+      <View style={styles.addTaskContainer}>
+        <TextInput
+          style={styles.taskInput}
+          placeholder="Add new task"
+          value={newTaskName}
+          onChangeText={setNewTaskName}
+        />
+        <Button title="Add Task" onPress={addTask} />
+      </View>
     </View>
   );
 };
@@ -228,6 +267,19 @@ const styles = StyleSheet.create({
   completedTaskText: {
     textDecorationLine: 'line-through',
     color: '#888',
+  },
+  addTaskContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  taskInput: {
+    flex: 1,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
   },
 });
 

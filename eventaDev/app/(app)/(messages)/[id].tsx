@@ -68,7 +68,7 @@ const MessagesPage = () => {
             }
         ])
     }
-
+        
     return (
         <View style={styles.container}>
             {user && conversations && conversations.length > 0 ? (

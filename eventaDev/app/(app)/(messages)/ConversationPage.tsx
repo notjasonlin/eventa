@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { TextInput, TouchableOpacity, View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
+import { TextInput, TouchableOpacity, View, Text, FlatList, StyleSheet, Dimensions, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
 import { Message } from "../../../interfaces/messageInterface";
 import { fetchMessages, sendMessage } from "../../../functions/messagingFunctions/messageFunctions";
 import { supabase } from "../../../lib/supabase";
@@ -39,10 +39,21 @@ const ConversationPage = () => {
 
     useEffect(() => {
         if (messages && messages.length > 0 && flatListRef.current) {
-            flatListRef.current.scrollToEnd({ animated: false });
+            flatListRef.current.scrollToEnd({ animated: true, });
         }
     }, [messages]);
 
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+            if (flatListRef.current) {
+                flatListRef.current.scrollToEnd({ animated: true });
+            }
+        });
+
+        return () => {
+            keyboardDidShowListener.remove();
+        };
+    }, []);
 
     const sendMessageContent = async () => {
         if (message.trim() !== "") {
@@ -77,7 +88,6 @@ const ConversationPage = () => {
         };
     }, [])
 
-
     const renderMessage = (message: Message) => {
         if (message.sender === senderID) {
             return (
@@ -99,9 +109,13 @@ const ConversationPage = () => {
     }
 
     return (
-        <>
-            {messages &&
-                <View style={styles.container}>
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 90}
+        >
+            <View style={styles.innerContainer}>
+                {messages &&
                     <FlatList
                         ref={flatListRef}
                         data={messages}
@@ -115,21 +129,25 @@ const ConversationPage = () => {
                             }
                         }}
                     />
-
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={(text) => setMessage(text)}
-                            value={message}
-                            placeholder="Send message"
-                        />
-                        <TouchableOpacity style={styles.sendButton} onPress={sendMessageContent}>
-                            <Text style={styles.sendButtonText}>Send!</Text>
-                        </TouchableOpacity>
-                    </View>
+                }
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.input}
+                        onChangeText={(text) => setMessage(text)}
+                        value={message}
+                        placeholder="Send message"
+                        onFocus={() => {
+                            if (flatListRef.current) {
+                                flatListRef.current.scrollToEnd({ animated: true });
+                            }
+                        }}
+                    />
+                    <TouchableOpacity style={styles.sendButton} onPress={sendMessageContent}>
+                        <Text style={styles.sendButtonText}>Send!</Text>
+                    </TouchableOpacity>
                 </View>
-            }
-        </>
+            </View>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -140,6 +158,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f0f0f0',
+    },
+    innerContainer: {
+        flex: 1,
         padding: 10,
     },
     messagesList: {
@@ -188,6 +209,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 10,
+        padding: 30,
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     input: {
         flex: 1,

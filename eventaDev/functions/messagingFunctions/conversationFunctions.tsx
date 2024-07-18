@@ -32,3 +32,15 @@ export const startConversation = async (convoData: Record<string, any>) => {
     }
 }
 
+export const deleteConversation = async (convoID: string) => {
+    console.log("Attempted to delete " + convoID);
+    // const { error } = await supabase
+    //     .from('conversations')
+    //     .delete()
+    //     .eq('id', convoID)
+
+    // if (error) {
+    //     console.error("Error deleting conversation:", error);
+    // }
+}
+

@@ -9,12 +9,13 @@ import { Event } from '../../../interfaces/eventInterface';
 import { useRouter } from 'expo-router';
 import { fetchEvents } from '../../../functions/eventFunctions/eventFunctions';
 import { setUpcomingEvents } from '../../../store/redux/events';
-import { costAddTrigger, setBudgetData } from '../../../store/redux/budget';
+import { costAddTrigger, setBudgetData, setPackageCost, setPackageEventID } from '../../../store/redux/budget';
 import { readBudget, updateBudget } from '../../../functions/budgetFunctions/budgetFunctions';
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useLayoutEffect } from 'react';
-import event from '../../../store/redux/event';
 import { addCost, readUnbookedCosts, updateCost } from '../../../functions/budgetFunctions/costFunctions';
+import uuid from 'react-native-uuid';
+import SendMessageModal from '../../../components/SendMessageModal';
 
 const SingleVendor = () => {
     const vendor = useSelector((state: RootState) => state.currentVendor.vendor);
@@ -24,7 +25,8 @@ const SingleVendor = () => {
     const costBookPackage = useSelector((state: RootState) => state.budgetSystem.costBookPackage);
     const dispatch = useDispatch<AppDispatch>();
     const router = useRouter();
-    const [showModal, setShowModal] = useState<boolean>(false);
+    const [showEventModal, setShowEventModal] = useState<boolean>(false);
+    const [showMessageModal, setShowMessageModal] = useState<boolean>(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
     const { title } = useLocalSearchParams();
     const navigation = useNavigation();
@@ -55,7 +57,7 @@ const SingleVendor = () => {
 
 
     useEffect(() => {
-        if (showModal && (!upcomingEvents || upcomingEvents.length === 0)) {
+        if (showEventModal && (!upcomingEvents || upcomingEvents.length === 0)) {
 
             // if (upcomingEvents) console.log(upcomingEvents.length)
 
@@ -74,9 +76,9 @@ const SingleVendor = () => {
                     },
                 ]
             );
-            setShowModal(false);
+            setShowEventModal(false);
         }
-    }, [showModal, upcomingEvents]);
+    }, [showEventModal, upcomingEvents]);
 
 
     const handleBook = async (event: Event) => {
@@ -91,26 +93,38 @@ const SingleVendor = () => {
         }
 
         const book = async () => {
+            console.log(event)
+
+
             if (vendor?.id !== undefined) {
                 const completeBook = async () => {
                     if (budgetData) {
                         let cost = null;
                         if (costBookPackage.cost) {
                             cost = costBookPackage.cost;
+                            dispatch(setPackageCost(null));
+                            dispatch(setPackageEventID(null));
                         } else {
                             const unbookedCosts = await readUnbookedCosts(budgetData.id); // check if there are cost without booked vendors
                             let searching = true;
                             let i = 0;
-                            while (unbookedCosts && searching) {
-                                cost = unbookedCosts[i++];
-                                if (cost.vendorType === vendor.vendorType) searching = false;
+                            while (unbookedCosts && i < unbookedCosts.length && searching) {
+                                const curr = unbookedCosts[i++];
+                                if (curr.vendorType === vendor.vendorType) {
+                                    cost = curr;
+                                    searching = false;
+                                }
                             }
                         }
-
+                        let id = "";
                         if (cost) {
                             await updateCost(budgetData.id, cost.id, { vendorID: vendor.id, costInDollar: vendor.cost })
+                            id = cost.id
                         } else {
+                            console.log("CREATE NEW");
+                            id = uuid.v4().toString();
                             await addCost({
+                                id: id,
                                 budgetID: budgetData?.id,
                                 vendorType: vendor.vendorType,
                                 vendorID: vendor.id,
@@ -118,12 +132,12 @@ const SingleVendor = () => {
                                 // Add other details once available
                             });
                         }
-                        await bookVendor(vendor.id, event.id, vendor.vendorType, vendor.cost,);
+                        await bookVendor(vendor.id, event.id, id, vendor.vendorType, vendor.cost);
                         await updateBudget(budgetData.id, remainder, vendor.cost);
                         const budget = await readBudget(event.id);
                         dispatch(setBudgetData(budget));
                         dispatch(costAddTrigger());
-                        setShowModal(false);
+                        setShowEventModal(false);
                     }
                 }
 
@@ -162,16 +176,24 @@ const SingleVendor = () => {
         ])
     }
 
+
     return (
         <View style={styles.container}>
             <Text style={styles.vendorName}>{vendor?.name}</Text>
-            <View style={styles.verifiedContainer}>
-                {vendor && vendor.verified && (
-                    <Text style={styles.verifiedText}>Eventa Verified</Text>
-                )}
-                {vendor && vendor.verified && (
-                    <Feather name="check-circle" size={16} color="#60d8ba" style={styles.verifiedIcon} />
-                )}
+            <View style={styles.subheaderContainer}>
+                <View style={styles.verifiedContainer}>
+                    {vendor && vendor.verified && (
+                        <Text style={styles.verifiedText}>Eventa Verified</Text>
+                    )}
+                    {vendor && vendor.verified && (
+                        <Feather name="check-circle" size={16} color="#60d8ba" style={styles.verifiedIcon} />
+                    )}
+                </View>
+                <View style={styles.contactIcon}>
+                    <TouchableOpacity onPress={() => setShowMessageModal(true)}>
+                        <Text>Contact Vendor</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             <Image source={DEFAULT_IMAGE} style={styles.vendorImage} />
             <View style={styles.buttonContainer}>
@@ -186,7 +208,7 @@ const SingleVendor = () => {
                     if (event) {
                         handleBook(event);
                     } else {
-                        setShowModal(true);
+                        setShowEventModal(true);
                     }
                 }}>
                     <Text style={styles.bookButtonText}>Book now!</Text>
@@ -201,9 +223,10 @@ const SingleVendor = () => {
             </View>
             <Text style={styles.descriptionText}>Description</Text>
             <Text style={styles.policyText}>Policy</Text>
-            {showModal && upcomingEvents && upcomingEvents.length > 0 && (
-                <EventSelectModal select={handleBook} hideModal={() => setShowModal(false)} upcomingEvents={upcomingEvents} />)
+            {showEventModal && upcomingEvents && upcomingEvents.length > 0 && (
+                <EventSelectModal select={handleBook} hideModal={() => setShowEventModal(false)} upcomingEvents={upcomingEvents} />)
             }
+            {showMessageModal && session && <SendMessageModal userID={session.user.id} hideModal={() => setShowMessageModal(false)}/>}
         </View>
     );
 }
@@ -225,10 +248,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    verifiedContainer: {
+    subheaderContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 10,
+    },
+    verifiedContainer: {
+        flexDirection: 'row',
     },
     verifiedText: {
         color: "#60d8ba",
@@ -237,6 +264,9 @@ const styles = StyleSheet.create({
     verifiedIcon: {
         paddingLeft: 4,
         paddingTop: 4,
+    },
+    contactIcon: {
+        alignItems: "flex-end",
     },
     vendorImage: {
         width: '100%',

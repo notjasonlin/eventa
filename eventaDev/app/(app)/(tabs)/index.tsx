@@ -12,15 +12,13 @@ import { readCosts } from "../../../functions/budgetFunctions/costFunctions";
 import { readBudget } from "../../../functions/budgetFunctions/budgetFunctions";
 import { setAllCosts, setBudgetData } from "../../../store/redux/budget";
 import YourVendorWidget from "../../../components/widgets/YourVendorWidget";
+import Carousel from "../../../components/carousel/Carousel";
 
 export const HomePage = () => {
   let name = grabName();
   const [uri, setUri] = useState<string | null>(null);
   const event = useSelector((state: RootState) => state.selectedEvent.event);
   const budget = useSelector((state: RootState) => state.budgetSystem.budgetData);
-  const catering = useSelector((state: RootState) => state.budgetSystem.cateringCosts);
-  const entertainment = useSelector((state: RootState) => state.budgetSystem.entertainmentCosts);
-  const venues = useSelector((state: RootState) => state.budgetSystem.venueCosts);
   const dispatch = useDispatch<AppDispatch>();
 
 
@@ -47,7 +45,9 @@ export const HomePage = () => {
       <EventSelector />
       {event && <EventDisplay />}
 
-      {event && <YourVendorWidget vendorsOne={catering} vendorsTwo={entertainment} vendorsThree={venues} types={["catering","entertainment", "venues"]}/>}
+      {event && <YourVendorWidget />}
+
+      {/* <Carousel /> */}
     </View>
   );
 };

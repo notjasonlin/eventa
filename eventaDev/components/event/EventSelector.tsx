@@ -34,15 +34,17 @@ const EventSelector: React.FC = () => {
             } else if (data) {
                 dispatch(setEvents(data));
                 setItems(data.map((event: Event) => ({ label: event.eventName, value: event.id })));
+                //console.log("EventSelector");
 
                 // Set the selected event
                 const selectedEvent = data.find((event: Event) => event.selected);
                 if (selectedEvent) {
                     dispatch(setEvent(selectedEvent));
+                    //console.log("EventSelector");
                 }
             }
         }
-    }, [session, dispatch]);
+    }, [/*session, dispatch*/]);
 
     useEffect(() => {
         fetchEvents();

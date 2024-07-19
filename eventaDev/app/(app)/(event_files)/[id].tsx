@@ -48,11 +48,12 @@ const EventDetails: React.FC = () => {
         console.log("Error fetching details: ", error);
       } else if (data) {
         setFormData(data);
+        console.log("id");
       }
     };
 
     fetchEventDetails();
-  }, [formData, id]);
+  }, [/*formData, id*/]);
 
   useEffect(() => {
     const fetchBookedVendorDetails = async () => {

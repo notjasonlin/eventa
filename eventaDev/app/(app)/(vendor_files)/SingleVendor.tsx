@@ -51,7 +51,7 @@ const SingleVendor = () => {
                 console.error("Session is null!");
             }
         } else {
-            console.log("Upcoming Events rendered!");
+            //console.log("Upcoming Events rendered!");
         }
     }, [session, upcomingEvents]);
 

@@ -70,7 +70,9 @@ const YourVendorCard = ({ vendors, type }: YourVendorCardProps) => {
                 </Link>
                 :
                 <Link href={{ pathname: "(vendor_files)/VendorTypePage", params: { type: type, title: type.charAt(0).toUpperCase() + type.slice(1) } }} asChild>
-                    <TouchableOpacity style={styles.card}>
+                    <TouchableOpacity style={styles.card} onPress={() => {
+                        if (event) dispatch(setPackageEventID(event?.id))
+                    }}>
                         <LinearGradient
                             colors={['#49936F', '#356a50', '#000000']}
                             style={styles.gradient}

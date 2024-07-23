@@ -98,7 +98,7 @@ const SingleCost = () => {
 
   const handleCheckout = async () => {
     if (cost) {
-      await initializePaymentSheet(cost.costInDollar);
+      await initializePaymentSheet(cost.costInDollar*100);
       const success = await openPaymentSheet();
       if (success) {
         console.log("Payment was successful");

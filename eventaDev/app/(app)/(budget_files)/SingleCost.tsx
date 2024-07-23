@@ -18,7 +18,7 @@ import {
 } from "../../../store/redux/budget";
 import UpdateCostModal from "../../../components/budget/UpdateCostModal";
 import { updateBudget } from "../../../functions/budgetFunctions/budgetFunctions";
-import { StripeProvider } from "@stripe/stripe-react-native";
+import { initializePaymentSheet, openPaymentSheet } from "../../../lib/stripe";
 
 const SingleCost = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -96,6 +96,18 @@ const SingleCost = () => {
     }
   };
 
+  const handleCheckout = async () => {
+    if (cost) {
+      await initializePaymentSheet(cost.costInDollar);
+      const success = await openPaymentSheet();
+      if (success) {
+        console.log("Payment was successful");
+      } else {
+        console.log("Payment failed or was canceled");
+      }
+    }
+  };
+
   return (
     <>
       {cost && !vendor && cost.vendorType !== "other" && (
@@ -136,6 +148,12 @@ const SingleCost = () => {
             onPress={() => setShowModal(true)}
           >
             <Text style={styles.buttonText}>Update</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.buttonPrimary}
+            onPress={handleCheckout}
+          >
+            <Text style={styles.buttonText}>Checkout</Text>
           </TouchableOpacity>
           {showModal && budgetData && (
             <UpdateCostModal

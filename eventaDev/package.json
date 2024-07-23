@@ -20,6 +20,7 @@
     "buffer": "^6.0.3",
     "expo": "~51.0.8",
     "expo-constants": "~16.0.1",
+    "expo-device": "^6.0.2",
     "expo-image-picker": "~15.0.5",
     "expo-linear-gradient": "~13.0.2",
     "expo-linking": "~6.3.1",

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "eventaDev",
-    "slug": "eventaDev",
+    "slug": "eventa",
     "scheme": "eventaDev",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -27,6 +27,15 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "01a14bc3-cd8f-458c-824e-df251a2a5e67"
+      }
+    },
+    "owner": "johnvnek"
   }
 }

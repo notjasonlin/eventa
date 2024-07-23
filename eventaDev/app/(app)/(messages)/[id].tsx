@@ -8,11 +8,14 @@ import { deleteConversation, fetchConversations } from "../../../functions/messa
 import { Link } from "expo-router";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
+import { grabProfileByID } from "../../../functions/profileFunctions";
+import { Chat } from "../../../interfaces/chatInterface";
 
 const MessagesPage = () => {
     const navigation = useNavigation();
     const user = useSelector((state: RootState) => state.authentication.session?.user);
     const [conversations, setConversations] = useState<Conversation[] | null>(null);
+    const [chats, setChats] = useState<Chat[] | null>(null);
     const [toggleDelete, setToggleDelete] = useState<boolean>(false);
     const [trigger, setTrigger] = useState<boolean>(false);
 
@@ -21,6 +24,23 @@ const MessagesPage = () => {
             if (user) {
                 const convos = await fetchConversations(user.id);
                 setConversations(convos);
+
+                const senderProfile = await grabProfileByID(user.id);
+                const userChats: Chat[] = [];
+                if (convos && senderProfile) {
+                    for (const convo of convos) {
+                        console.log("ENTER CONVO");
+
+                        const reciever = senderProfile.id === convo.user1ID ? convo.user2ID : convo.user1ID;
+                        const recieverProfile = await grabProfileByID(reciever);
+                        console.log(recieverProfile);
+                        if (recieverProfile) {
+                            userChats.push({"convo": convo, "sender": senderProfile, "reciever": recieverProfile});
+                            // console.log(userChats);
+                        }
+                    }
+                    setChats(userChats);
+                }
             }
         }
         grabConvos();
@@ -73,18 +93,17 @@ const MessagesPage = () => {
         <View style={styles.container}>
             {user && conversations && conversations.length > 0 ? (
                 <FlatList
-                    data={conversations}
-                    keyExtractor={(item) => item.id.toString()}
+                    data={chats}
+                    keyExtractor={(item) => item.convo.id.toString()}
                     renderItem={({ item }) => {
-                        const reciever = user.id === item.user1ID ? item.user2ID : item.user1ID;
                         return (
-                            <Link href={{ pathname: "(messages)/ConversationPage", params: { convo: item.id, sender: user.id, reciever: reciever } }} asChild>
+                            <Link href={{ pathname: "(messages)/ConversationPage", params: { convo: item.convo.id, sender: item.sender.id, reciever: item.reciever.id } }} asChild>
                                 <TouchableOpacity style={styles.conversationItem}>
                                     <Text style={styles.conversationText}>
-                                        {reciever}
+                                        {item.reciever.firstName}
                                     </Text>
                                     {toggleDelete &&
-                                        <TouchableOpacity onPress={() => handleDelete(item.id, reciever)}>
+                                        <TouchableOpacity onPress={() => handleDelete(item.convo.id, item.reciever.id)}>
                                             <Feather name="x-circle" size={18} color="red" />
                                         </TouchableOpacity>
                                     }

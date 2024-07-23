@@ -1,0 +1,160 @@
+import { supabase } from "../../lib/supabase";
+import { Cost } from "../../interfaces/costInterface";
+import uuid from 'react-native-uuid';
+
+export const readCosts = async (budgetID: string): Promise<{
+    costs: Cost[], venues: Cost[], catering: Cost[],
+    photographers: Cost[], entertainment: Cost[], decoration: Cost[], other: Cost[]
+} | null> => {
+    let { data: costs, error } = await supabase
+        .from('costs')
+        .select('*')
+        .eq('budgetID', budgetID)
+
+    if (error) {
+        console.error(error);
+        return null;
+    } else if (!costs) {
+        return null;
+    } else {
+        const venues: Cost[] = [];
+        const catering: Cost[] = [];
+        const photographers: Cost[] = [];
+        const entertainment: Cost[] = [];
+        const decoration: Cost[] = [];
+        const other: Cost[] = [];
+
+        costs.filter((cost: Cost) => {
+            if (cost.vendorType === "venues") {
+                venues.push(cost);
+            } else if (cost.vendorType === "catering") {
+                catering.push(cost);
+            } else if (cost.vendorType === "photographers") {
+                photographers.push(cost);
+            } else if (cost.vendorType === "entertainment") {
+                entertainment.push(cost);
+            } else if (cost.vendorType === "decoration") {
+                decoration.push(cost);
+            } else {
+                other.push(cost);
+            }
+        });
+
+        return {
+            costs,
+            venues,
+            catering,
+            photographers,
+            entertainment,
+            decoration,
+            other
+        }
+    }
+}
+
+
+export const readCost = async (budgetID: string, costID: string): Promise<Cost | null> => {
+    let { data: cost, error } = await supabase
+        .from('costs')
+        .select('*')
+        .eq('budgetID', budgetID)
+        .eq("id", costID)
+
+    if (error) {
+        console.error(error);
+        return null;
+    } else if (!cost) {
+        return null;
+    } else {
+        return cost[0];
+    }
+}
+
+export const addCost = async (costData: Record<string, any>) => {
+    const defaultValues = {
+        id: uuid.v4().toString(),
+        budgetID: 0,
+        vendorType: '',
+        costInDollar: 0,
+        priority: 0,
+        flexibility: false,
+        flexTop: 0,
+        predictedCost: 0,
+        absoluteMinimum: 0,
+        predictedEstimate: 0,
+        vendorID: null,
+    };
+
+    const mergedData = { ...defaultValues, ...costData };
+
+    const insertData = {
+        id: mergedData.id,
+        budgetID: mergedData.budgetID,
+        vendorType: mergedData.vendorType,
+        costInDollar: mergedData.costInDollar,
+        priority: mergedData.priority,
+        flexibility: mergedData.flexibility,
+        flexTop: mergedData.flexTop,
+        predictedCost: mergedData.predictedCost,
+        absoluteMinimum: mergedData.absoluteMinimum,
+        percentEstimate: mergedData.predictedEstimate,
+        vendorID: mergedData.vendorID,
+    };
+
+    console.log(insertData);
+
+    try {
+        const { data, error } = await supabase.from('costs').insert([insertData]);
+
+        if (error) {
+            console.error('Error inserting data:', error);
+            throw error;
+        }
+
+        console.log('Data inserted successfully:', data);
+    } catch (err) {
+        console.error('Caught error:', err);
+        throw err;
+    }
+};
+
+export const readUnbookedCosts = async (budgetID: string): Promise<Cost[] | null> => {
+    let { data: costs, error } = await supabase
+        .from('costs')
+        .select('*')
+        .eq('budgetID', budgetID)
+        .is('vendorID', null);
+
+    if (error) {
+        console.error(error);
+        return null;
+    } else if (!costs) {
+        return null;
+    } else {
+        return costs;
+    }
+}
+
+export const updateCost = async (budgetID: string, costID: string, column: Record<string, any>) => { // change budget and cost ID to string when uuid
+    const { data, error } = await supabase
+        .from('costs')
+        .update(column)
+        .eq('budgetID', budgetID)
+        .eq('id', costID)
+        .select()
+
+    if (error) {
+        console.error(error);
+    }
+}
+
+export const deleteCost = async (costID: string) => {
+    const { error } = await supabase
+        .from('costs')
+        .delete()
+        .eq('id', costID)
+
+    if (error) {
+        console.error(error);
+    }
+}

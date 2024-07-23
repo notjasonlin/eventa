@@ -1,0 +1,10 @@
+type VendorType = 'VENUES' | 'CATERING' | 'PHOTOGRAPHERS' | 'ENTERTAINMENT'| 'DECORATION'  | 'OTHER';
+
+export const BUDGET_ESTIMATES: Record<VendorType, number> = {
+  VENUES: 0.18, 
+  DECORATION: 0.06, 
+  CATERING: 0.30, 
+  ENTERTAINMENT: 0.12,
+  PHOTOGRAPHERS: 0.14, 
+  OTHER: 0.20
+};

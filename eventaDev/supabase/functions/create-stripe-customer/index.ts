@@ -3,21 +3,47 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts"
+import "https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts";
+import Stripe from "https://esm.sh/stripe?target=deno";
+import { createClient } from "https://esm.sh/@supabase/supabase-js?dts";
 
-console.log("Hello from Functions!")
+const stripe = Stripe(Deno.env.get("STRIPE_KEY"), {
+  httpClient: Stripe.createFetchHttpClient(),
+});
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL"),
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+);
 
 Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
-  }
+  const { record } = await req.json();
+
+  console.log({ record });
+
+  const customer = await stripe.customers.create({
+    name: record.firstName + " " + record.lastName,
+    email: record.email,
+    phone: record.phone,
+    metadata: {
+      supabaseKey: record.id,
+    },
+  });
+
+  const { data, error } = await supabase
+    .from("profile")
+    .update({
+      stripe_customer_id: customer.id,
+    })
+    .match({ id: record.id });
+
+  console.log ({ data, error, customer });
 
   return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
-})
+    JSON.stringify({ stripe_customer_id: customer.id }),
+    { headers: { "Content-Type": "application/json" } }
+  );
+});
 
 /* To invoke locally:
 

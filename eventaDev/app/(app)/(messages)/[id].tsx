@@ -10,7 +10,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 
 const MessagesPage = () => {
-    const route = useRoute();
     const navigation = useNavigation();
     const user = useSelector((state: RootState) => state.authentication.session?.user);
     const [conversations, setConversations] = useState<Conversation[] | null>(null);

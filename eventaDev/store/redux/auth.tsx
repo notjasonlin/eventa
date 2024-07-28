@@ -2,26 +2,18 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { Session } from '@supabase/supabase-js';
 import { Alert } from 'react-native';
 import { supabase } from '../../lib/supabase';
-
-interface Profile {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    gender: string;
-    dob: string | null;
-    phone: number | null;
-    created_at: string;
-}
+import { Profile } from "../../interfaces/profileInterface";
 
 interface AuthState {
     session: Session | null;
     profile: Profile | null;
+    expoPushToken: string | null;
 }
 
 const initialState: AuthState = {
     session: null,
     profile: null,
+    expoPushToken: null,
 };
 
 const authSlice = createSlice({
@@ -31,6 +23,9 @@ const authSlice = createSlice({
         setSession(state, action: PayloadAction<Session | null>) {
             state.session = action.payload;
         },
+        setExpoPushToken(state, action: PayloadAction<string | null>) {
+            state.expoPushToken = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -129,7 +124,7 @@ export const fetchProfile = createAsyncThunk(
         //console.log(`Fetching profile for user ID: ${id}`);
         const { data, error } = await supabase
             .from('profile')
-            .select('id, firstName, lastName, email, gender, dob, phone, created_at')
+            .select('id, firstName, lastName, email, gender, dob, phone, created_at, expo_push_token')
             .eq('id', id)
             .single();
 
@@ -178,5 +173,5 @@ export const updateProfile = createAsyncThunk(
     }
 );
 
-export const { setSession } = authSlice.actions;
+export const { setSession, setExpoPushToken } = authSlice.actions;
 export default authSlice.reducer;

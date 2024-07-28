@@ -13,12 +13,34 @@ import { readBudget } from "../../../functions/budgetFunctions/budgetFunctions";
 import { setAllCosts, setBudgetData } from "../../../store/redux/budget";
 import YourVendorWidget from "../../../components/widgets/YourVendorWidget";
 import Carousel from "../../../components/carousel/Carousel";
+import { Button } from "react-native";
+
+async function sendPushNotification(expoPushToken: string) {
+  const message = {
+    to: expoPushToken,
+    sound: "default",
+    title: "Original Title",
+    body: "And here is the body!",
+    data: { someData: "goes here" },
+  };
+
+  await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Accept-encoding": "gzip, deflate",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(message),
+  });
+}
 
 export const HomePage = () => {
   let name = grabName();
   const [uri, setUri] = useState<string | null>(null);
   const event = useSelector((state: RootState) => state.selectedEvent.event);
   const budget = useSelector((state: RootState) => state.budgetSystem.budgetData);
+  const expoPushToken = useSelector((state: RootState) => state.authentication.expoPushToken);
   const dispatch = useDispatch<AppDispatch>();
 
 
@@ -40,6 +62,10 @@ export const HomePage = () => {
 
   return (
     <View style={styles.container}>
+      <Button title={"Notify"} onPress={() => {
+        if (expoPushToken) sendPushNotification(expoPushToken)}
+        }
+      />
       <Text style={styles.eventTitle}>Home Page</Text>
       <Text style={styles.email}>Welcome back, {name}!</Text>
       <EventSelector />

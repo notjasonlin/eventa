@@ -8,9 +8,10 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { supabase } from "../../lib/supabase";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store/redux/store";
 import Constants from "expo-constants";
+import { setExpoPushToken } from "../../store/redux/auth";
 
 const configurePushNotifications = async () => {
     const { status } = await Notifications.getPermissionsAsync();
@@ -47,22 +48,23 @@ const configurePushNotifications = async () => {
 }
 
 const RootLayout = () => {
-    const [expoPushToken, setExpoPushToken] = useState("");
     const [notification, setNotification] =
         useState<Notifications.Notification>();
     const notificationListener = useRef<Notifications.Subscription>();
     const responseListener = useRef<Notifications.Subscription>();
     const session = useSelector((state: RootState) => state.authentication.session);
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         configurePushNotifications().then(async (token) => {
-            setExpoPushToken(token);
+            dispatch(setExpoPushToken(token))
             // console.log(token);
 
             const { error } = await supabase
                 .from("profile")
                 .update({ expo_push_token: token })
                 .eq("id", session?.user.id);
+
             console.log(error);
         });
 

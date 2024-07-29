@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
 
   console.log("push token", data);
 
-  const res = await fetch('https://exp.host/--/api/v2/push/send', {
+  const res = await fetch('https://meehvdwhjxszsdgpeljs.supabase.co/functions/v1/push', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

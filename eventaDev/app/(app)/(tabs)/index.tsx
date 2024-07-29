@@ -24,7 +24,7 @@ async function sendPushNotification(expoPushToken: string) {
     data: { someData: "goes here" },
   };
 
-  await fetch("https://exp.host/--/api/v2/push/send", {
+  await fetch("https://meehvdwhjxszsdgpeljs.supabase.co/functions/v1/push", {
     method: "POST",
     headers: {
       Accept: "application/json",

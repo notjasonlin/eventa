@@ -71,7 +71,7 @@ export default function Account() {
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || dob;
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform.OS === 'ios' ? true : false);
     setDob(currentDate);
   };
 

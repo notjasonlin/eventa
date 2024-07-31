@@ -6,6 +6,7 @@ import eventReducer from "./event";
 import marketplaceReducer from "./marketplace";
 import budgetReducer from "./budget";
 import checklistReducer from './checklist'; // Import the checklist reducer
+import contactsReducer from "./contacts";
 
 
 export const store = configureStore({
@@ -17,6 +18,7 @@ export const store = configureStore({
         vendorMarketplace: marketplaceReducer,
         budgetSystem: budgetReducer,
         checklistSystem: checklistReducer,
+        userContacts: contactsReducer,
     }
 });
 

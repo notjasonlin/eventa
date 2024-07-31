@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.eventa"
+      "package": "app.eventa",
+      "googleServicesFile": "./eventa-8504c-firebase-adminsdk-1pxh9-c11acbb975.json"
     },
     "web": {
       "bundler": "metro",

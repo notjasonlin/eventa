@@ -2,7 +2,7 @@
   "expo": {
     "name": "eventaDev",
     "slug": "eventa",
-    "scheme": "eventaDev",
+    "scheme": "eventadev",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,13 +13,16 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "app.eventa"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "app.eventa",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -33,9 +36,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "01a14bc3-cd8f-458c-824e-df251a2a5e67"
+        "projectId": "8d396ed6-867e-450e-a531-f65bdda7192e"
       }
     },
-    "owner": "johnvnek"
+    "owner": "eventa"
   }
 }

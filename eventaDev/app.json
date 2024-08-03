@@ -2,7 +2,7 @@
   "expo": {
     "name": "eventaDev",
     "slug": "eventa",
-    "scheme": "eventaDev",
+    "scheme": "eventadev",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -22,7 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "app.eventa",
-      "googleServicesFile": "./eventa-8504c-firebase-adminsdk-1pxh9-c11acbb975.json"
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

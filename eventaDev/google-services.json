@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410239496234",
+    "project_id": "eventa-8504c",
+    "storage_bucket": "eventa-8504c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410239496234:android:0ac29d0f5ef446243f1353",
+        "android_client_info": {
+          "package_name": "app.eventa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4G03omd8PCSMxSZaW62DdXwA8NqBXvq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

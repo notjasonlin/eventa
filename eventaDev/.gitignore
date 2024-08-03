@@ -33,6 +33,3 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-
-# specific file to ignore
-eventa-8504c-firebase-adminsdk-1pxh9-c11acbb975.json

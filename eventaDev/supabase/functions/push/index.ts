@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
 
   const { data } = await supabase
     .from('profile')
-    .select('expo_push_token')
+    .select('expo_push_token, firstName, lastName')
     .eq('id', payload.record.reciever)
     .single()
 
@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       to: data?.expo_push_token,
       sound: 'default',
+      header: "" + (data?.firstName ? data?.firstName : "") + " " + (data?.lastName ? data?.lastName : ""),
       body: payload.record.content,
       // body: "Hello world!",
     }),

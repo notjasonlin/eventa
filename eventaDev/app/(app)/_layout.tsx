@@ -7,8 +7,14 @@ import { useEffect } from "react";
 import { Alert, Platform } from "react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as Contacts from "expo-contacts";
+import { grabProfileByPhone } from "../../functions/profileFunctions";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store/redux/store";
+import { addContactWOPrf, addContactWPrf } from "../../store/redux/contacts";
 
 const RootLayout = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
   useEffect(() => {
     const configurePushNotifications = async () => {
       const { status } = await Notifications.getPermissionsAsync();
@@ -27,7 +33,7 @@ const RootLayout = () => {
       }
 
       const pushTokenData = await Notifications.getExpoPushTokenAsync();
-    //   console.log("Push token", pushTokenData);
+      //   console.log("Push token", pushTokenData);
 
       if (Platform.OS === "android") {
         Notifications.setNotificationChannelAsync("default", {
@@ -41,22 +47,59 @@ const RootLayout = () => {
   }, []);
 
   useEffect(() => {
+    const addContact = async (digits: string, firstName: string, lastName: string, countryCode: string) => {
+      const data = await grabProfileByPhone(digits);
+      if (data) {
+        dispatch(addContactWPrf({ "phoneNumber": digits, "firstName": firstName, "lastName": lastName, 
+          "countryCode": countryCode, "inDB": true, "profile": data }));
+      } else {
+        dispatch(addContactWOPrf({ "phoneNumber": digits, "firstName": firstName, "lastName": lastName, 
+          "countryCode": countryCode, "inDB": false, "profile": null }));
+      }
+    };
+
     (async () => {
       const { status } = await Contacts.requestPermissionsAsync();
       if (status === "granted") {
-        const { data } = await Contacts.getContactsAsync({
-          fields: [Contacts.Fields.PhoneNumbers, Contacts.Fields.Birthday],
-        });
+        const fields = [
+          Contacts.Fields.PhoneNumbers,
+          Contacts.Fields.Birthday,
+          Contacts.Fields.FirstName,
+          Contacts.Fields.LastName,
+        ];
+
+        const { data } = await Contacts.getContactsAsync({ fields });
 
         if (data.length > 0) {
-        //   console.log("data", data);
-          const contact = data[0];
-          const number = contact.phoneNumbers;
-          const firstName = contact.firstName;
-          const lastName = contact.lastName;
-          console.log("Phone number", number, "First name", firstName, "Last name", lastName);
+          data.forEach((contact) => {
+            const phoneNumbers = contact.phoneNumbers;
+            if (phoneNumbers && phoneNumbers.length > 0) {
+              phoneNumbers.forEach((phone) => {
+                let digits = "";
+                if (Platform.OS === "android") {
+                  digits = phone.number ? phone.number : ""; // andriod uses phone.number
+                  //digits = digits?.replace(/\D/g, ''); // Remove non-numeric characters for Android
+                } else if (Platform.OS === "ios") {
+                  digits = phone.digits ? phone.digits : ""; // ios uses phone.digits
+                }
+                const firstName = contact.firstName ? contact.firstName : "";
+                const lastName = contact.lastName ? contact.lastName : "";
+                const countryCode = phone.countryCode || "Unknown"; // Handling possible absence of country code
+                addContact(digits, firstName, lastName, countryCode);
 
-          //console.log(contact);
+                // console.log(
+                //   "Digits:",
+                //   digits,
+                //   "Country Code:",
+                //   countryCode,
+                //   "First name:",
+                //   firstName,
+                //   "Last name:",
+                //   lastName
+                // );
+              });
+            }
+          });
         }
       }
     })();

@@ -21,3 +21,23 @@ export const grabProfileByID = async (id: string): Promise<Profile | null> => {
         return null;
     }
 };
+
+export const grabProfileByPhone = async (phoneNumber: string): Promise<Profile | null> => {
+    let { data: profiles, error } = await supabase
+        .from('profile')
+        .select('id, firstName, lastName')
+        .eq('phone', phoneNumber);
+
+    if (error) {
+        console.error("Error grabbing user profile", error);
+        throw error;
+    }
+
+    if (profiles) console.log(profiles);
+
+    if (profiles && profiles.length > 0) {
+        return profiles[0];
+    } else {
+        return null;
+    }
+};

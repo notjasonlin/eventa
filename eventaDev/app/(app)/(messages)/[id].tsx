@@ -18,8 +18,11 @@ const MessagesPage = () => {
     const [chats, setChats] = useState<Chat[] | null>(null);
     const [toggleDelete, setToggleDelete] = useState<boolean>(false);
     const [trigger, setTrigger] = useState<boolean>(false);
+    const contacts = useSelector((state: RootState) => state.userContacts.contacts);
 
     useEffect(() => {
+        console.log("contacts", contacts);
+
         const grabConvos = async () => {
             if (user) {
                 const convos = await fetchConversations(user.id);
@@ -29,11 +32,11 @@ const MessagesPage = () => {
                 const userChats: Chat[] = [];
                 if (convos && senderProfile) {
                     for (const convo of convos) {
-                        console.log("ENTER CONVO");
+                        // console.log("ENTER CONVO");
 
                         const reciever = senderProfile.id === convo.user1ID ? convo.user2ID : convo.user1ID;
                         const recieverProfile = await grabProfileByID(reciever);
-                        console.log(recieverProfile);
+                        // console.log(recieverProfile);
                         if (recieverProfile) {
                             userChats.push({"convo": convo, "sender": senderProfile, "reciever": recieverProfile});
                             // console.log(userChats);

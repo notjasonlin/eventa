@@ -8,12 +8,15 @@ import { Alert, Platform } from "react-native";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import * as Contacts from "expo-contacts";
 import { grabProfileByPhone } from "../../functions/profileFunctions";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../store/redux/store";
-import { addContactWOPrf, addContactWPrf } from "../../store/redux/contacts";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/redux/store";
+import { addContactWOPrf, addContactWPrf, setCache } from "../../store/redux/contacts";
+import { MMKVLoader } from 'react-native-mmkv-storage';
 
 const RootLayout = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const MMKV = new MMKVLoader().initialize();
+  const cache = useSelector((state: RootState) => state.userContacts.cacheStore)
 
   useEffect(() => {
     const configurePushNotifications = async () => {
@@ -50,59 +53,75 @@ const RootLayout = () => {
     const addContact = async (digits: string, firstName: string, lastName: string, countryCode: string) => {
       const data = await grabProfileByPhone(digits);
       if (data) {
-        dispatch(addContactWPrf({ "phoneNumber": digits, "firstName": firstName, "lastName": lastName, 
-          "countryCode": countryCode, "inDB": true, "profile": data }));
+        dispatch(addContactWPrf({
+          "phoneNumber": digits, "firstName": firstName, "lastName": lastName,
+          "countryCode": countryCode, "inDB": true, "profile": data
+        }));
       } else {
-        dispatch(addContactWOPrf({ "phoneNumber": digits, "firstName": firstName, "lastName": lastName, 
-          "countryCode": countryCode, "inDB": false, "profile": null }));
+        dispatch(addContactWOPrf({
+          "phoneNumber": digits, "firstName": firstName, "lastName": lastName,
+          "countryCode": countryCode, "inDB": false, "profile": null
+        }));
       }
     };
 
     (async () => {
-      const { status } = await Contacts.requestPermissionsAsync();
-      if (status === "granted") {
-        const fields = [
-          Contacts.Fields.PhoneNumbers,
-          Contacts.Fields.Birthday,
-          Contacts.Fields.FirstName,
-          Contacts.Fields.LastName,
-        ];
+      if (!cache) {
+        console.log("Enter!!!!")
+        dispatch(setCache(MMKV));
+        const { status } = await Contacts.requestPermissionsAsync();
+        if (status === "granted") {
+          const fields = [
+            Contacts.Fields.PhoneNumbers,
+            Contacts.Fields.Birthday,
+            Contacts.Fields.FirstName,
+            Contacts.Fields.LastName,
+          ];
 
-        const { data } = await Contacts.getContactsAsync({ fields });
+          const { data } = await Contacts.getContactsAsync({ fields });
+          // console.log(data)
+          const json = JSON.stringify(data)
+          // console.log(json)
 
-        if (data.length > 0) {
-          let i = 0
-          data.forEach((contact) => {
-            const phoneNumbers = contact.phoneNumbers;
-            if (phoneNumbers && phoneNumbers.length > 0) {
-              phoneNumbers.forEach((phone) => {
-                let digits = "";
-                if (Platform.OS === "android") {
-                  digits = phone.number ? phone.number : ""; // andriod uses phone.number
-                  //digits = digits?.replace(/\D/g, ''); // Remove non-numeric characters for Android
-                } else if (Platform.OS === "ios") {
-                  digits = phone.digits ? phone.digits : ""; // ios uses phone.digits
-                }
-                const firstName = contact.firstName ? contact.firstName : "";
-                const lastName = contact.lastName ? contact.lastName : "";
-                const countryCode = phone.countryCode || "Unknown"; // Handling possible absence of country code
-                if (i++ < 3){
-                  addContact(digits, firstName, lastName, countryCode);
-                }
+          await MMKV.setStringAsync("contacts", json);
 
-                // console.log(
-                //   "Digits:",
-                //   digits,
-                //   "Country Code:",
-                //   countryCode,
-                //   "First name:",
-                //   firstName,
-                //   "Last name:",
-                //   lastName
-                // );
-              });
-            }
-          });
+          const test = await MMKV.getStringAsync("contacts");
+          console.log(test);
+
+          // if (data.length > 0) {
+          //   let i = 0
+          //   data.forEach((contact) => {
+          //     const phoneNumbers = contact.phoneNumbers;
+          //     if (phoneNumbers && phoneNumbers.length > 0) {
+          //       phoneNumbers.forEach((phone) => {
+          //         let digits = "";
+          //         if (Platform.OS === "android") {
+          //           digits = phone.number ? phone.number : ""; // andriod uses phone.number
+          //           //digits = digits?.replace(/\D/g, ''); // Remove non-numeric characters for Android
+          //         } else if (Platform.OS === "ios") {
+          //           digits = phone.digits ? phone.digits : ""; // ios uses phone.digits
+          //         }
+          //         const firstName = contact.firstName ? contact.firstName : "";
+          //         const lastName = contact.lastName ? contact.lastName : "";
+          //         const countryCode = phone.countryCode || "Unknown"; // Handling possible absence of country code
+          //         if (i++ < 3){
+          //           // addContact(digits, firstName, lastName, countryCode);
+          //         }
+
+          //         // console.log(
+          //         //   "Digits:",
+          //         //   digits,
+          //         //   "Country Code:",
+          //         //   countryCode,
+          //         //   "First name:",
+          //         //   firstName,
+          //         //   "Last name:",
+          //         //   lastName
+          //         // );
+          //       });
+          //     }
+          //   });
+          // }
         }
       }
     })();

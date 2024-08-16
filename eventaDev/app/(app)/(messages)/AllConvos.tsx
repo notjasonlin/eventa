@@ -3,7 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/redux/store";
-import { Conversation } from "../../../interfaces/conversationInterface";
+import { Conversation } from "../../../interfaces/converstaionInterface";
 import { deleteConversation, fetchConversations } from "../../../functions/messagingFunctions/conversationFunctions";
 import { Link } from "expo-router";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -14,14 +14,13 @@ import { Chat } from "../../../interfaces/chatInterface";
 const MessagesPage = () => {
     const navigation = useNavigation();
     const user = useSelector((state: RootState) => state.authentication.session?.user);
-    const withProfile = useSelector((state: RootState) => state.userContacts.withProfile);
-    const withoutProfile = useSelector((state: RootState) => state.userContacts.withoutProfile);
+    // const withProfile = useSelector((state: RootState) => state.userContacts.withProfile);
+    // const withoutProfile = useSelector((state: RootState) => state.userContacts.withoutProfile);
     const [conversations, setConversations] = useState<Conversation[] | null>(null);
     const [chats, setChats] = useState<Chat[] | null>(null);
     const [toggleDelete, setToggleDelete] = useState<boolean>(false);
     const [trigger, setTrigger] = useState<boolean>(false);
     const [showContacts, setShowContacts] = useState<boolean>(false);
-    const contacts = useSelector((state: RootState) => state.userContacts.contacts);
 
     useEffect(() => {
         // console.log("contacts", contacts);
@@ -128,7 +127,7 @@ const MessagesPage = () => {
                 )
             ) : (
                 <View style={styles.contactsContainer}>
-                    <FlatList
+                    {/* <FlatList
                         data={[...withProfile, ...withoutProfile]}
                         keyExtractor={(item) => item.phoneNumber}
                         renderItem={({ item }) => {
@@ -138,7 +137,7 @@ const MessagesPage = () => {
                                 </TouchableOpacity>
                             );
                         }}
-                    />
+                    /> */}
                 </View>
             )}
         </View>

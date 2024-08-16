@@ -130,7 +130,7 @@ const MessagesPage = () => {
                 <View style={styles.contactsContainer}>
                     <FlatList
                         data={[...withProfile, ...withoutProfile]}
-                        keyExtractor={(item) => item.phoneNumber + item.firstName + item.lastName}
+                        keyExtractor={(item) => item.phoneNumber}
                         renderItem={({ item }) => {
                             return (
                                 <TouchableOpacity style={styles.contactItem}>

@@ -9,7 +9,7 @@ import { Feather } from '@expo/vector-icons';
 const renderHeaderRight = () => (
   <View style={{ flexDirection: "row", marginLeft: 10 }}>
     <NavButton
-      destination="(messages)/1"
+      destination="(messages)/AllConvos"
       icon={<AntDesign name="mail" size={24} color="black" />}
     />
     <NavButton

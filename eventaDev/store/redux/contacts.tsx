@@ -1,37 +1,32 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Contact } from "../../interfaces/contactInterface";
-import { Profile } from "../../interfaces/profileInterface";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Contact } from './contactInterface';
 
-interface UserContactsState {
+interface ContactsState {
   contacts: Contact[];
   withProfile: Contact[];
   withoutProfile: Contact[];
 }
 
-const initialState: UserContactsState = {
+const initialState: ContactsState = {
   contacts: [],
   withProfile: [],
   withoutProfile: [],
 };
 
 const contactsSlice = createSlice({
-  name: "userContacts",
+  name: 'contacts',
   initialState,
   reducers: {
-    setContacts(state, action: PayloadAction<Contact[]>) {
-      state.contacts = action.payload;
-    },
     addContactWPrf(state, action: PayloadAction<Contact>) {
-      state.contacts.concat(action.payload);
-      state.withProfile.concat(action.payload);
+      state.contacts = [...state.contacts, action.payload];
+      state.withProfile = [...state.withProfile, action.payload];
     },
     addContactWOPrf(state, action: PayloadAction<Contact>) {
-      state.contacts.concat(action.payload);
-      state.withoutProfile.concat(action.payload);
+      state.contacts = [...state.contacts, action.payload];
+      state.withoutProfile = [...state.withoutProfile, action.payload];
     },
-  }
+  },
 });
 
-export const { setContacts, addContactWPrf, addContactWOPrf } = contactsSlice.actions;
+export const { addContactWPrf, addContactWOPrf } = contactsSlice.actions;
 export default contactsSlice.reducer;
-

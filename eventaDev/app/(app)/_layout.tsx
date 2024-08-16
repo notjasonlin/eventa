@@ -71,6 +71,7 @@ const RootLayout = () => {
         const { data } = await Contacts.getContactsAsync({ fields });
 
         if (data.length > 0) {
+          let i = 0
           data.forEach((contact) => {
             const phoneNumbers = contact.phoneNumbers;
             if (phoneNumbers && phoneNumbers.length > 0) {
@@ -85,7 +86,9 @@ const RootLayout = () => {
                 const firstName = contact.firstName ? contact.firstName : "";
                 const lastName = contact.lastName ? contact.lastName : "";
                 const countryCode = phone.countryCode || "Unknown"; // Handling possible absence of country code
-                addContact(digits, firstName, lastName, countryCode);
+                if (i++ < 3){
+                  addContact(digits, firstName, lastName, countryCode);
+                }
 
                 // console.log(
                 //   "Digits:",

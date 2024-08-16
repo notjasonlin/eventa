@@ -2,19 +2,19 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 
 console.log('Hello from Functions!')
 
-interface Notification {
-  id: string
-  user_id: string
-  body: string
-}
+// interface Notification {
+//   id: string
+//   user_id: string
+//   body: string
+// }
 
-interface WebhookPayload {
-  type: 'INSERT' | 'UPDATE' | 'DELETE'
-  table: string
-  record: Notification
-  schema: 'public'
-  old_record: null | Notification
-}
+// interface WebhookPayload {
+//   type: 'INSERT' | 'UPDATE' | 'DELETE'
+//   table: string
+//   record: Notification
+//   schema: 'public'
+//   old_record: null | Notification
+// }
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -33,23 +33,25 @@ console.log('1')
 Deno.serve(async (req) => {
   console.log('2')
 
-  const text = await req.text();
-  console.log('Request body:', text); // Log the request body
+  // const text = await req.text();
+  // console.log('Request body:', text); // Log the request body
 
-  const payload: WebhookPayload = await req.json()
+  // const payload: WebhookPayload = await req.json()
+  const payload = await req.json()
 
   console.log("payload", payload);
+  console.log("record", payload.record);
 
 
   const { data } = await supabase
     .from('profile')
-    .select('expo_push_token')
-    .eq('id', payload.record.user_id)
+    .select('expo_push_token, firstName, lastName')
+    .eq('id', payload.record.reciever)
     .single()
 
   console.log("push token", data);
 
-  const res = await fetch('https://meehvdwhjxszsdgpeljs.supabase.co/functions/v1/push', {
+  const res = await fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -58,8 +60,9 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       to: data?.expo_push_token,
       sound: 'default',
-      // body: payload.record.body,
-      body: "Hello world!",
+      header: "" + (data?.firstName ? data?.firstName : "") + " " + (data?.lastName ? data?.lastName : ""),
+      body: payload.record.content,
+      // body: "Hello world!",
     }),
   }).then((res) => {
     console.log("res", res);
